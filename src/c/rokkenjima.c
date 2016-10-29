@@ -115,6 +115,7 @@ static void prv_window_load(Window *window) {
 static void prv_window_unload(Window *window) {
   layer_destroy(s_hands_layer);
   layer_destroy(s_canvas_layer);
+  fonts_unload_custom_font(s_label_font);
 }
 
 static void prv_init(void) {

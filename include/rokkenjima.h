@@ -104,8 +104,6 @@ static const GPathInfo HOUR_HAND_POINTS = {
 
 #define LABELHEIGHT 16
 #define LABELWIDTH 28
-#define MINLABELOFFSET 10
-#define ANGLEDOFFSET 3
 
 struct Label {
     uint32_t num;
