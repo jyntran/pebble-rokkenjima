@@ -5,6 +5,7 @@ static Window *s_window;
 static Layer *s_canvas_layer, *s_hands_layer;
 static GPath *s_tick_paths[NUM_CLOCK_TICKS];
 static GPath *s_minute_arrow, *s_hour_arrow;
+static GFont s_label_font;
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
   layer_mark_dirty(window_get_root_layer(s_window));
@@ -14,6 +15,7 @@ static void bluetooth_callback(bool connected) {
   window_set_background_color(s_window, GColorBlack);
 
   if (!connected) {
+    window_set_background_color(s_window, GColorRed);
     vibes_double_pulse();
   }
 }
@@ -23,7 +25,7 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
   
   // White clockface
   GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
-  uint16_t radius = bounds.size.w/2 - 8;
+  uint16_t radius = bounds.size.w/2 - 6;
   graphics_context_set_fill_color(ctx, GColorWhite);
   graphics_fill_circle(ctx, centre, radius);
 
@@ -33,8 +35,36 @@ static void canvas_update_proc(Layer *layer, GContext *ctx) {
   graphics_draw_circle(ctx, centre, radius-4);
   graphics_draw_circle(ctx, centre, radius-6);
   graphics_draw_circle(ctx, centre, radius/3);
-        
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Drawn canvas");
+
+  // Numbers
+  struct Label LABELS[] = {
+    {12, "XII"},
+    {1, "I"},       
+    {2, "II"},     
+    {3, "III"},       
+    {4, "IV"},       
+    {5, "V"},       
+    {6, "VI"},       
+    {7, "VII"},       
+    {8, "VIII"},       
+    {9, "IX"},       
+    {10, "X"},       
+    {11, "XI"}      
+  };
+
+  for (int i=0; i <12; i++) {
+    int angle = (TRIG_MAX_ANGLE * (i % 12) * 6) / (12 * 6);
+    int x = (centre.x - (LABELWIDTH/2)) + (sin_lookup(angle) * (radius-LABELHEIGHT) / TRIG_MAX_RATIO);
+    int y = (centre.y - (LABELHEIGHT/2)) + (-cos_lookup(angle) * (radius-LABELHEIGHT) / TRIG_MAX_RATIO);
+  
+    if (i==0) {
+      graphics_context_set_text_color(ctx, GColorRed);
+    } else {
+      graphics_context_set_text_color(ctx, GColorBlack);
+    }
+
+    graphics_draw_text(ctx, LABELS[i].text, s_label_font, GRect(x, y, LABELWIDTH, LABELHEIGHT), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+  }
 }
 
 static void hands_update_proc(Layer *layer, GContext *ctx) {
@@ -63,7 +93,9 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
 static void prv_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
-
+  
+  s_label_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_LABEL_12));
+  
   window_set_background_color(s_window, GColorRed);
 
   bluetooth_callback(connection_service_peek_pebble_app_connection());
@@ -128,9 +160,6 @@ static void prv_deinit(void) {
 
 int main(void) {
   prv_init();
-
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "Done initializing, pushed window: %p", s_window);
-
   app_event_loop();
   prv_deinit();
 }

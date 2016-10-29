@@ -6,7 +6,7 @@
   "private": true,
   "dependencies": {},
   "pebble": {
-    "displayName": "people",
+    "displayName": "Rokkenjima",
     "uuid": "7ee95869-e417-4c30-8e20-e1d44338f999",
     "sdkVersion": "3",
     "enableMultiJS": true,
@@ -24,6 +24,12 @@
     ],
     "resources": {
       "media": [
+        {
+          "characterRegex": "[IVX]",
+          "type": "font",
+          "name": "FONT_LABEL_12",
+          "file": "fonts/LinLibertine_R.ttf"
+        }
       ]
     }
   }
