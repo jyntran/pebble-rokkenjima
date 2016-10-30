@@ -1,11 +1,10 @@
 #include <pebble.h>
 #include <pdc-transform/pdc-transform.h>
-#include <math.h>
 #include "rokkenjima.h"
 
 static Window *s_window;
 static Layer *s_clock_layer, *s_hands_layer;
-static GDrawCommandImage *s_minute_hand, *s_hour_hand;
+static GDrawCommandImage *s_bg, *s_minute_hand, *s_hour_hand;
 static GFont s_label_font;
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
@@ -17,7 +16,9 @@ static void bluetooth_callback(bool connected) {
 
   if (!connected) {
     window_set_background_color(s_window, GColorRed);
-    static const uint32_t const segments[] = { 1200, 100, 300 };
+   
+    // Long vibrate
+    static const uint32_t const segments[] = { 1000, 100, 300 };
     VibePattern pat = {
       .durations = segments,
       .num_segments = ARRAY_LENGTH(segments),
@@ -32,18 +33,23 @@ static void clock_update_proc(Layer *layer, GContext *ctx) {
   // White clockface
   GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
   uint16_t radius = bounds.size.w/2;
-  graphics_context_set_fill_color(ctx, GColorWhite);
+  graphics_context_set_fill_color(ctx, GColorPastelYellow);
   graphics_fill_radial(ctx, bounds, GOvalScaleModeFitCircle, radius, 0, DEG_TO_TRIGANGLE(360));
+
+  // Background
+  gdraw_command_image_draw(ctx, s_bg, GPoint(centre.x-52, centre.y-50));
 
   // Border
   GRect frame;
-  graphics_context_set_stroke_color(ctx, GColorLightGray);
+  graphics_context_set_stroke_color(ctx, GColorDarkGray);
   graphics_context_set_stroke_width(ctx, 1);
   frame = grect_inset(bounds, GEdgeInsets(4));
   graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
   frame = grect_inset(bounds, GEdgeInsets(6));
   graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
-  frame = grect_inset(bounds, GEdgeInsets(2*radius/3));
+  frame = grect_inset(bounds, GEdgeInsets(48));
+  graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
+  frame = grect_inset(bounds, GEdgeInsets(50));
   graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
 
   // Numbers
@@ -147,6 +153,7 @@ static void prv_window_unload(Window *window) {
   fonts_unload_custom_font(s_label_font);
   gdraw_command_image_destroy(s_minute_hand);
   gdraw_command_image_destroy(s_hour_hand);
+  gdraw_command_image_destroy(s_bg);
 }
 
 static void prv_init(void) {
@@ -160,6 +167,7 @@ static void prv_init(void) {
 
   s_minute_hand = gdraw_command_image_create_with_resource(RESOURCE_ID_IMAGE_MINUTE_HAND);
   s_hour_hand = gdraw_command_image_create_with_resource(RESOURCE_ID_IMAGE_HOUR_HAND);
+  s_bg = gdraw_command_image_create_with_resource(RESOURCE_ID_IMAGE_BG);
   
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
 
