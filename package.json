@@ -2,9 +2,13 @@
   "name": "Rokkenjima",
   "author": "jyntran",
   "version": "1.0.0",
-  "keywords": ["pebble-app"],
+  "keywords": [
+    "pebble-app"
+  ],
   "private": true,
-  "dependencies": {},
+  "dependencies": {
+    "pdc-transform": "^1.0.3"
+  },
   "pebble": {
     "displayName": "Rokkenjima",
     "uuid": "7ee95869-e417-4c30-8e20-e1d44338f999",
@@ -29,6 +33,16 @@
           "type": "font",
           "name": "FONT_LABEL_12",
           "file": "fonts/LinLibertine_R.ttf"
+        },
+        {
+          "type": "raw",
+          "name": "IMAGE_MINUTE_HAND",
+          "file": "images/minute-hand.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "IMAGE_HOUR_HAND",
+          "file": "images/hour-hand.pdc"
         }
       ]
     }
