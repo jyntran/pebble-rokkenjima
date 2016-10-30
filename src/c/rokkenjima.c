@@ -3,7 +3,7 @@
 #include "rokkenjima.h"
 
 static Window *s_window;
-static Layer *s_canvas_layer, *s_hands_layer;
+static Layer *s_clock_layer, *s_hands_layer;
 static GDrawCommandImage *s_minute_hand, *s_hour_hand;
 static GFont s_label_font;
 
@@ -20,7 +20,7 @@ static void bluetooth_callback(bool connected) {
   }
 }
 
-static void canvas_update_proc(Layer *layer, GContext *ctx) {
+static void clock_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
   
   // White clockface
@@ -74,14 +74,23 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   struct tm *t = localtime(&now);
 
   // minute/hour hand
+  GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
   graphics_context_set_fill_color(ctx, GColorYellow);
   graphics_context_set_stroke_color(ctx, GColorBlack);
-
-  GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
-
-  pdc_transform_gdraw_command_image_draw_transformed(ctx, s_minute_hand, GPoint(centre.x-8,centre.y-60), 10, 360 * t->tm_min / 60);
-
-  pdc_transform_gdraw_command_image_draw_transformed(ctx, s_hour_hand, GPoint(centre.x-8,centre.y-50), 10, (360 * (((t->tm_hour % 12) * 6) + (t->tm_min / 10))) / (12 * 6));
+  
+  pdc_transform_gdraw_command_image_draw_transformed(
+    ctx,
+    s_hour_hand,
+    GPoint(centre.x-8,centre.y-40), // origin
+    10, // scale
+    (360 * (((t->tm_hour % 12) * 6) + (t->tm_min / 10))) / (12 * 6));
+  
+  pdc_transform_gdraw_command_image_draw_transformed(
+    ctx,
+    s_minute_hand,
+    GPoint(centre.x-8,centre.y-60), // origin
+    10, // scale
+    360 * t->tm_min / 60);
 
   // dot in the middle
   uint32_t radius = bounds.size.w/2 - 2; 
@@ -97,12 +106,10 @@ static void prv_window_load(Window *window) {
   
   bluetooth_callback(connection_service_peek_pebble_app_connection());
 
-  // Canvas layer
-  s_canvas_layer = layer_create(bounds);
-  layer_set_update_proc(s_canvas_layer, canvas_update_proc);
-  layer_add_child(window_layer, s_canvas_layer);
-
-  layer_mark_dirty(s_canvas_layer);
+  // Clock layer
+  s_clock_layer = layer_create(bounds);
+  layer_set_update_proc(s_clock_layer, clock_update_proc);
+  layer_add_child(window_layer, s_clock_layer);
 
   // Hands layer
   s_hands_layer = layer_create(bounds);
@@ -112,7 +119,7 @@ static void prv_window_load(Window *window) {
 
 static void prv_window_unload(Window *window) {
   layer_destroy(s_hands_layer);
-  layer_destroy(s_canvas_layer);
+  layer_destroy(s_clock_layer);
   fonts_unload_custom_font(s_label_font);
   gdraw_command_image_destroy(s_minute_hand);
   gdraw_command_image_destroy(s_hour_hand);
