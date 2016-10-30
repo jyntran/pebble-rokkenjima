@@ -31,8 +31,8 @@
         {
           "characterRegex": "[IVX]",
           "type": "font",
-          "name": "FONT_LABEL_12",
-          "file": "fonts/LinLibertine_R.ttf"
+          "name": "FONT_LABEL_13",
+          "file": "fonts/LinLibertine_RB.ttf"
         },
         {
           "type": "raw",

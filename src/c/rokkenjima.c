@@ -1,5 +1,6 @@
 #include <pebble.h>
 #include <pdc-transform/pdc-transform.h>
+#include <math.h>
 #include "rokkenjima.h"
 
 static Window *s_window;
@@ -16,7 +17,12 @@ static void bluetooth_callback(bool connected) {
 
   if (!connected) {
     window_set_background_color(s_window, GColorRed);
-    vibes_double_pulse();
+    static const uint32_t const segments[] = { 1200, 100, 300 };
+    VibePattern pat = {
+      .durations = segments,
+      .num_segments = ARRAY_LENGTH(segments),
+    };
+    vibes_enqueue_custom_pattern(pat);
   }
 }
 
@@ -25,16 +31,20 @@ static void clock_update_proc(Layer *layer, GContext *ctx) {
   
   // White clockface
   GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
-  uint16_t radius = bounds.size.w/2 - 2;
+  uint16_t radius = bounds.size.w/2;
   graphics_context_set_fill_color(ctx, GColorWhite);
-  graphics_fill_circle(ctx, centre, radius);
+  graphics_fill_radial(ctx, bounds, GOvalScaleModeFitCircle, radius, 0, DEG_TO_TRIGANGLE(360));
 
-  // Border 
+  // Border
+  GRect frame;
   graphics_context_set_stroke_color(ctx, GColorLightGray);
   graphics_context_set_stroke_width(ctx, 1);
-  graphics_draw_circle(ctx, centre, radius-4);
-  graphics_draw_circle(ctx, centre, radius-6);
-  graphics_draw_circle(ctx, centre, radius/3);
+  frame = grect_inset(bounds, GEdgeInsets(4));
+  graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
+  frame = grect_inset(bounds, GEdgeInsets(6));
+  graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
+  frame = grect_inset(bounds, GEdgeInsets(2*radius/3));
+  graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
 
   // Numbers
   struct Label LABELS[] = {
@@ -54,16 +64,30 @@ static void clock_update_proc(Layer *layer, GContext *ctx) {
 
   for (int i=0; i <12; i++) {
     int angle = (TRIG_MAX_ANGLE * (i % 12) * 6) / (12 * 6);
-    int x = (centre.x - (LABELWIDTH/2)) + (sin_lookup(angle) * (radius-LABELHEIGHT) / TRIG_MAX_RATIO);
-    int y = (centre.y - (LABELHEIGHT/2)) + (-cos_lookup(angle) * (radius-LABELHEIGHT) / TRIG_MAX_RATIO);
+    int x = (centre.x - (LABELWIDTH/2)) + (sin_lookup(angle) * (radius-16) / TRIG_MAX_RATIO);
+    int y = (centre.y - (LABELHEIGHT/2)) + (-cos_lookup(angle) * (radius-16) / TRIG_MAX_RATIO);
   
-    if (i==0) {
+    if (i==0) { // red 12
       graphics_context_set_text_color(ctx, GColorRed);
     } else {
       graphics_context_set_text_color(ctx, GColorBlack);
     }
 
-    graphics_draw_text(ctx, LABELS[i].text, s_label_font, GRect(x, y, LABELWIDTH, LABELHEIGHT), GTextOverflowModeWordWrap, GTextAlignmentCenter, NULL);
+    GRect pos;
+    if (i==8) { // offset for 8
+      pos = GRect(x+2, y, LABELWIDTH+2, LABELHEIGHT);
+    } else {
+      pos = GRect(x, y, LABELWIDTH, LABELHEIGHT);
+    }
+
+    graphics_draw_text(
+      ctx,
+      LABELS[i].text,
+      s_label_font,
+      pos,
+      GTextOverflowModeWordWrap,
+      GTextAlignmentCenter,
+      NULL);
   }
 }
 
@@ -75,8 +99,6 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
 
   // minute/hour hand
   GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
-  graphics_context_set_fill_color(ctx, GColorYellow);
-  graphics_context_set_stroke_color(ctx, GColorBlack);
   
   pdc_transform_gdraw_command_image_draw_transformed(
     ctx,
@@ -93,7 +115,9 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
     360 * t->tm_min / 60);
 
   // dot in the middle
-  uint32_t radius = bounds.size.w/2 - 2; 
+  uint32_t radius = bounds.size.w/2; 
+  graphics_context_set_fill_color(ctx, GColorYellow);
+  graphics_context_set_stroke_color(ctx, GColorWindsorTan);
   graphics_fill_circle(ctx, centre, radius/12);
   graphics_draw_circle(ctx, centre, radius/12);
 }
@@ -102,7 +126,7 @@ static void prv_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
   
-  s_label_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_LABEL_12));
+  s_label_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_LABEL_13));
   
   bluetooth_callback(connection_service_peek_pebble_app_connection());
 
