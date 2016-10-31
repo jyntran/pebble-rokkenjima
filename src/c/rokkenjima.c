@@ -15,7 +15,7 @@ static void bluetooth_callback(bool connected) {
   window_set_background_color(s_window, GColorBlack);
 
   if (!connected) {
-    window_set_background_color(s_window, GColorRed);
+    window_set_background_color(s_window, PBL_IF_COLOR_ELSE(GColorRed, GColorWhite));
    
     // Long vibrate
     static const uint32_t const segments[] = { 1000, 100, 300 };
@@ -33,7 +33,7 @@ static void clock_update_proc(Layer *layer, GContext *ctx) {
   // White clockface
   GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
   uint16_t radius = bounds.size.w/2;
-  graphics_context_set_fill_color(ctx, GColorPastelYellow);
+  graphics_context_set_fill_color(ctx, PBL_IF_COLOR_ELSE(GColorPastelYellow, GColorWhite));
   graphics_fill_radial(ctx, bounds, GOvalScaleModeFitCircle, radius, 0, DEG_TO_TRIGANGLE(360));
 
   // Background
@@ -43,13 +43,13 @@ static void clock_update_proc(Layer *layer, GContext *ctx) {
   GRect frame;
   graphics_context_set_stroke_color(ctx, GColorDarkGray);
   graphics_context_set_stroke_width(ctx, 1);
-  frame = grect_inset(bounds, GEdgeInsets(4));
+  frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(8, 4)));
   graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
-  frame = grect_inset(bounds, GEdgeInsets(6));
+  frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(10, 6)));
   graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
-  frame = grect_inset(bounds, GEdgeInsets(48));
+  frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(64, 48)));
   graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
-  frame = grect_inset(bounds, GEdgeInsets(50));
+  frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(66, 50)));
   graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
 
   // Numbers
@@ -70,8 +70,8 @@ static void clock_update_proc(Layer *layer, GContext *ctx) {
 
   for (int i=0; i <12; i++) {
     int angle = (TRIG_MAX_ANGLE * (i % 12) * 6) / (12 * 6);
-    int x = (centre.x - (LABELWIDTH/2)) + (sin_lookup(angle) * (radius-16) / TRIG_MAX_RATIO);
-    int y = (centre.y - (LABELHEIGHT/2)) + (-cos_lookup(angle) * (radius-16) / TRIG_MAX_RATIO);
+    int x = (centre.x - (LABELWIDTH/2)) + (sin_lookup(angle) * (radius-PBL_IF_ROUND_ELSE(24,16)) / TRIG_MAX_RATIO);
+    int y = (centre.y - (LABELHEIGHT/2)) + (-cos_lookup(angle) * (radius-PBL_IF_ROUND_ELSE(24,16)) / TRIG_MAX_RATIO);
   
     if (i==0) { // red 12
       graphics_context_set_text_color(ctx, GColorRed);
@@ -109,30 +109,31 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   pdc_transform_gdraw_command_image_draw_transformed(
     ctx,
     s_hour_hand,
-    GPoint(centre.x-8,centre.y-40), // origin
-    10, // scale
+    PBL_IF_ROUND_ELSE(GPoint(centre.x-8,centre.y-45), GPoint(centre.x-8,centre.y-40)), // origin
+    PBL_IF_ROUND_ELSE(12.5, 10), // scale
     (360 * (((t->tm_hour % 12) * 6) + (t->tm_min / 10))) / (12 * 6));
   
   pdc_transform_gdraw_command_image_draw_transformed(
     ctx,
     s_minute_hand,
-    GPoint(centre.x-8,centre.y-60), // origin
-    10, // scale
+    PBL_IF_ROUND_ELSE(GPoint(centre.x-8,centre.y-72), GPoint(centre.x-8,centre.y-60)), // origin
+    PBL_IF_ROUND_ELSE(12.5, 10), // scale
     360 * t->tm_min / 60);
 
   // dot in the middle
   uint32_t radius = bounds.size.w/2; 
-  graphics_context_set_fill_color(ctx, GColorYellow);
-  graphics_context_set_stroke_color(ctx, GColorWindsorTan);
-  graphics_fill_circle(ctx, centre, radius/12);
-  graphics_draw_circle(ctx, centre, radius/12);
+  graphics_context_set_fill_color(ctx, PBL_IF_COLOR_ELSE(GColorYellow, GColorBlack));
+  graphics_context_set_stroke_color(ctx, PBL_IF_COLOR_ELSE(GColorWindsorTan, GColorBlack));
+  GRect frame = grect_inset(bounds, GEdgeInsets(11*radius/12));
+  graphics_fill_radial(ctx, frame, GOvalScaleModeFitCircle, radius, 0, DEG_TO_TRIGANGLE(360));
+  graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
 }
 
 static void prv_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
   
-  s_label_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_LABEL_13));
+  s_label_font = fonts_load_custom_font(resource_get_handle(PBL_IF_ROUND_ELSE(RESOURCE_ID_FONT_LABEL_15, RESOURCE_ID_FONT_LABEL_13)));
   
   bluetooth_callback(connection_service_peek_pebble_app_connection());
 
@@ -165,8 +166,8 @@ static void prv_init(void) {
   const bool animated = true;
   window_stack_push(s_window, animated);
 
-  s_minute_hand = gdraw_command_image_create_with_resource(RESOURCE_ID_IMAGE_MINUTE_HAND);
-  s_hour_hand = gdraw_command_image_create_with_resource(RESOURCE_ID_IMAGE_HOUR_HAND);
+  s_minute_hand = gdraw_command_image_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_IMAGE_MINUTE_HAND, RESOURCE_ID_IMAGE_MINUTE_HAND_BW));
+  s_hour_hand = gdraw_command_image_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_IMAGE_HOUR_HAND, RESOURCE_ID_IMAGE_HOUR_HAND_BW));
   s_bg = gdraw_command_image_create_with_resource(RESOURCE_ID_IMAGE_BG);
   
   tick_timer_service_subscribe(MINUTE_UNIT, tick_handler);
