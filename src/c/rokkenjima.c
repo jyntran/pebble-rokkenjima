@@ -109,14 +109,14 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   pdc_transform_gdraw_command_image_draw_transformed(
     ctx,
     s_hour_hand,
-    PBL_IF_ROUND_ELSE(GPoint(centre.x-8,centre.y-45), GPoint(centre.x-8,centre.y-40)), // origin
+    PBL_IF_ROUND_ELSE(GPoint(centre.x-10,centre.y-45), GPoint(centre.x-8,centre.y-40)), // origin
     PBL_IF_ROUND_ELSE(12.5, 10), // scale
     (360 * (((t->tm_hour % 12) * 6) + (t->tm_min / 10))) / (12 * 6));
   
   pdc_transform_gdraw_command_image_draw_transformed(
     ctx,
     s_minute_hand,
-    PBL_IF_ROUND_ELSE(GPoint(centre.x-8,centre.y-72), GPoint(centre.x-8,centre.y-60)), // origin
+    PBL_IF_ROUND_ELSE(GPoint(centre.x-10,centre.y-72), GPoint(centre.x-8,centre.y-60)), // origin
     PBL_IF_ROUND_ELSE(12.5, 10), // scale
     360 * t->tm_min / 60);
 
