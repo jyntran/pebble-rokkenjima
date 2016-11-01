@@ -5,8 +5,10 @@ struct ClaySettings settings;
 static void prv_default_settings() {
   settings.BackgroundColour = GColorBlack;
   settings.ClockColour = PBL_IF_COLOR_ELSE(GColorPastelYellow, GColorWhite);
+  settings.ShowClockPattern = true;
   settings.HandColour = PBL_IF_COLOR_ELSE(GColorChromeYellow, GColorBlack);
   settings.HandOutlineColour = PBL_IF_COLOR_ELSE(GColorWindsorTan, GColorWhite);
+  settings.HourOverMinute = false;
   settings.BtVibration = true;
   settings.BtBackgroundColour = PBL_IF_COLOR_ELSE(GColorRed, GColorWhite);
 }
@@ -27,6 +29,11 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
     settings.ClockColour = GColorFromHEX(ck_colour_t->value->int32);
   }
 
+  Tuple *ckp_bool_t = dict_find(iter, MESSAGE_KEY_ShowClockPattern);
+  if (ckp_bool_t) {
+    settings.ShowClockPattern = ckp_bool_t->value->int32 == 1;
+  }
+
   Tuple *hd_colour_t = dict_find(iter, MESSAGE_KEY_HandColour);
   if (hd_colour_t) {
     settings.HandColour = GColorFromHEX(hd_colour_t->value->int32);
@@ -37,9 +44,14 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
     settings.HandOutlineColour = GColorFromHEX(hdo_colour_t->value->int32);
   }
 
-  Tuple *bt_vibe_t = dict_find(iter, MESSAGE_KEY_BtVibration);
-  if (bt_vibe_t) {
-    settings.BtVibration = bt_vibe_t->value->int32 == 1;
+  Tuple *hom_bool_t = dict_find(iter, MESSAGE_KEY_HourOverMinute);
+  if (hom_bool_t) {
+    settings.HourOverMinute = hom_bool_t->value->int32 == 1;
+  }
+
+  Tuple *bt_bool_t = dict_find(iter, MESSAGE_KEY_BtVibration);
+  if (bt_bool_t) {
+    settings.BtVibration = bt_bool_t->value->int32 == 1;
   }
 
   Tuple *bt_colour_t = dict_find(iter, MESSAGE_KEY_BtBackgroundColour);

@@ -10,37 +10,58 @@
         "type": "color",
         "messageKey": "BackgroundColour",
         "defaultValue": "0x000000",
-        "label": "Background Colour"
+        "label": "Background Colour",
+        "description": "Change background colour",
+        "defaultValue": "0x000000"
       },
       {
         "type": "color",
         "messageKey": "ClockColour",
-        "defaultValue": "0xFFFFAA",
-        "label": "Clock Colour"
+        "label": "Clock Colour",
+        "description": "Change clock face colour",
+        "defaultValue": "0xFFFFAA"
+      },
+      {
+        "type": "toggle",
+        "messageKey": "ShowClockPattern",
+        "label": "Show Clock Pattern",
+        "description": "Display floral pattern on clock face",
+        "defaultValue": true
       },
       {
         "type": "color",
         "messageKey": "HandColour",
-        "defaultValue": "0xFFFF00",
-        "label": "Hand Colour"
+        "label": "Hand Colour",
+        "description": "Change the fill colour of the clock hands",
+        "defaultValue": "0xFFFF00"
       },
       {
         "type": "color",
         "messageKey": "HandOutlineColour",
-        "defaultValue": "0xAA5500",
-        "label": "Hand Outline Colour"
+        "label": "Hand Outline Colour",
+        "description": "Change the stroke colour of the clock hands",
+        "defaultValue": "0xAA5500"
+      },
+      {
+        "type": "toggle",
+        "messageKey": "HourOverMinute",
+        "label": "Hour Hand Over Minute Hand",
+        "description": "Hour hand will be drawn on top of the minute hand",
+        "defaultValue": false
       },
       {
         "type": "toggle",
         "messageKey": "BtVibration",
         "label": "Vibrate on Disconnect",
+        "description": "Enable/disable watch vibration on Bluetooth disconnect",
         "defaultValue": true
       },
       {
         "type": "color",
         "messageKey": "BtBackgroundColour",
-        "defaultValue": "0xFF0000",
-        "label": "Background Colour on Disconnect"
+        "label": "Background Colour on Disconnect",
+        "description": "Change background colour on Bluetooth disconnect",
+        "defaultValue": "0xFF0000"
       }
     ]
   },

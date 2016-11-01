@@ -27,8 +27,10 @@
     "messageKeys": [
       "BackgroundColour",
       "ClockColour",
+      "ShowClockPattern",
       "HandColour",
       "HandOutlineColour",
+      "HourOverMinute",
       "BtVibration",
       "BtBackgroundColour"
     ],
@@ -43,7 +45,7 @@
         {
           "characterRegex": "[IVX]",
           "type": "font",
-          "name": "FONT_LABEL_15",
+          "name": "FONT_LABEL_14",
           "file": "fonts/LinLibertine_RB.ttf"
         },
         {

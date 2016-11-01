@@ -38,7 +38,9 @@ static void clock_update_proc(Layer *layer, GContext *ctx) {
   graphics_fill_radial(ctx, bounds, GOvalScaleModeFitCircle, radius, 0, DEG_TO_TRIGANGLE(360));
 
   // Background
-  gdraw_command_image_draw(ctx, s_bg, GPoint(centre.x-52, centre.y-50));
+  if (settings.ShowClockPattern) {
+    gdraw_command_image_draw(ctx, s_bg, GPoint(centre.x-52, centre.y-50));
+  }
 
   // Border
   GRect frame;
@@ -148,10 +150,18 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
 
   graphics_context_set_fill_color(ctx, settings.HandColour);
   graphics_context_set_stroke_color(ctx, settings.HandOutlineColour);
-  gpath_draw_filled(ctx, s_h_hand);
-  gpath_draw_outline(ctx, s_h_hand);
-  gpath_draw_filled(ctx, s_m_hand);
-  gpath_draw_outline(ctx, s_m_hand);
+
+  if (settings.HourOverMinute) {
+    gpath_draw_filled(ctx, s_m_hand);
+    gpath_draw_outline(ctx, s_m_hand);
+    gpath_draw_filled(ctx, s_h_hand);
+    gpath_draw_outline(ctx, s_h_hand);
+  } else {
+    gpath_draw_filled(ctx, s_h_hand);
+    gpath_draw_outline(ctx, s_h_hand);
+    gpath_draw_filled(ctx, s_m_hand);
+    gpath_draw_outline(ctx, s_m_hand);
+  }
 
   gpath_destroy(s_h_hand);
   gpath_destroy(s_m_hand);
@@ -166,9 +176,11 @@ static void prv_window_load(Window *window) {
   Layer *window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(window_layer);
 
-  s_label_font = fonts_load_custom_font(resource_get_handle(PBL_IF_ROUND_ELSE(RESOURCE_ID_FONT_LABEL_15, RESOURCE_ID_FONT_LABEL_13)));
+  s_label_font = fonts_load_custom_font(resource_get_handle(PBL_IF_ROUND_ELSE(RESOURCE_ID_FONT_LABEL_14, RESOURCE_ID_FONT_LABEL_13)));
 
-  s_bg = gdraw_command_image_create_with_resource(RESOURCE_ID_IMAGE_BG);
+  if (settings.ShowClockPattern) {
+    s_bg = gdraw_command_image_create_with_resource(RESOURCE_ID_IMAGE_BG);
+  }
 
   bluetooth_callback(connection_service_peek_pebble_app_connection());
 
