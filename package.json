@@ -1,13 +1,14 @@
 {
   "name": "Rokkenjima",
   "author": "jyntran",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "keywords": [
     "pebble-app"
   ],
   "private": true,
   "dependencies": {
-    "pdc-transform": "^1.0.3"
+    "pdc-transform": "^1.0.3",
+    "pebble-clay": "^1.0.3"
   },
   "pebble": {
     "displayName": "Rokkenjima",
@@ -24,7 +25,12 @@
       "watchface": true
     },
     "messageKeys": [
-      "dummy"
+      "BackgroundColour",
+      "ClockColour",
+      "HandColour",
+      "HandOutlineColour",
+      "BtVibration",
+      "BtBackgroundColour"
     ],
     "resources": {
       "media": [

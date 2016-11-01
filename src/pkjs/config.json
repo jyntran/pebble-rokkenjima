@@ -1,0 +1,52 @@
+[
+  {
+    "type": "heading",
+    "defaultValue": "Rokkenjima Watchface"
+  },
+  {
+    "type": "section",
+    "items": [
+      {
+        "type": "color",
+        "messageKey": "BackgroundColour",
+        "defaultValue": "0x000000",
+        "label": "Background Colour"
+      },
+      {
+        "type": "color",
+        "messageKey": "ClockColour",
+        "defaultValue": "0xFFFFAA",
+        "label": "Clock Colour"
+      },
+      {
+        "type": "color",
+        "messageKey": "HandColour",
+        "defaultValue": "0xFFFF00",
+        "label": "Hand Colour"
+      },
+      {
+        "type": "color",
+        "messageKey": "HandOutlineColour",
+        "defaultValue": "0xAA5500",
+        "label": "Hand Outline Colour"
+      },
+      {
+        "type": "toggle",
+        "messageKey": "BtVibration",
+        "label": "Vibrate on Disconnect",
+        "defaultValue": true
+      },
+      {
+        "type": "color",
+        "messageKey": "BtBackgroundColour",
+        "defaultValue": "0xFF0000",
+        "label": "Background Colour on Disconnect"
+      }
+    ]
+  },
+  {
+    "type": "submit",
+    "defaultValue": "Save Settings"
+  }
+]
+
