@@ -99,12 +99,12 @@ static void clock_update_proc(Layer *layer, GContext *ctx) {
 }
 
 static void hands_update_proc(Layer *layer, GContext *ctx) {
-  GRect bounds = layer_get_bounds(layer);
-
   time_t now = time(NULL);
   struct tm *t = localtime(&now);
+  
+  GRect bounds = layer_get_bounds(layer);
 
-  // minute/hour hands
+  // Minute/hour hands
   GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
   uint32_t radius = bounds.size.w/2; 
 
@@ -147,17 +147,16 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   gpath_rotate_to(s_m_hand, TRIG_MAX_ANGLE * t->tm_min / 60);
 
   graphics_context_set_fill_color(ctx, settings.HandColour);
-  gpath_draw_filled(ctx, s_h_hand);
-  gpath_draw_filled(ctx, s_m_hand);
-
   graphics_context_set_stroke_color(ctx, settings.HandOutlineColour);
+  gpath_draw_filled(ctx, s_h_hand);
   gpath_draw_outline(ctx, s_h_hand);
+  gpath_draw_filled(ctx, s_m_hand);
   gpath_draw_outline(ctx, s_m_hand);
 
   gpath_destroy(s_h_hand);
   gpath_destroy(s_m_hand);
 
-  // dot in the middle
+  // Dot in the middle
   GRect frame = grect_inset(bounds, GEdgeInsets(11*radius/12));
   graphics_fill_radial(ctx, frame, GOvalScaleModeFitCircle, radius, 0, DEG_TO_TRIGANGLE(360));
   graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
