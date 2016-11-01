@@ -6,7 +6,7 @@ static void prv_default_settings() {
   settings.BackgroundColour = GColorBlack;
   settings.ClockColour = PBL_IF_COLOR_ELSE(GColorPastelYellow, GColorWhite);
   settings.HandColour = PBL_IF_COLOR_ELSE(GColorYellow, GColorBlack);
-  settings.HandOutlineColour = PBL_IF_COLOR_ELSE(GColorWindsorTan, GColorBlack);
+  settings.HandOutlineColour = PBL_IF_COLOR_ELSE(GColorWindsorTan, GColorWhite);
   settings.BtVibration = true;
   settings.BtBackgroundColour = PBL_IF_COLOR_ELSE(GColorRed, GColorWhite);
 }

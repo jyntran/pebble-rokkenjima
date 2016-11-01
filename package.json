@@ -48,26 +48,6 @@
         },
         {
           "type": "raw",
-          "name": "IMAGE_MINUTE_HAND",
-          "file": "images/minute-hand.pdc"
-        },
-        {
-          "type": "raw",
-          "name": "IMAGE_MINUTE_HAND_BW",
-          "file": "images/minute-hand-bw.pdc"
-        },
-        {
-          "type": "raw",
-          "name": "IMAGE_HOUR_HAND",
-          "file": "images/hour-hand.pdc"
-        },
-        {
-          "type": "raw",
-          "name": "IMAGE_HOUR_HAND_BW",
-          "file": "images/hour-hand-bw.pdc"
-        },
-        {
-          "type": "raw",
           "name": "IMAGE_BG",
           "file": "images/bg.pdc"
         }

@@ -2,7 +2,7 @@
 
 static Window *s_window;
 static Layer *s_clock_layer, *s_hands_layer;
-static GDrawCommandImage *s_bg, *s_minute_hand, *s_hour_hand;
+static GDrawCommandImage *s_bg;
 static GFont s_label_font;
 
 void prv_window_update() {
@@ -104,27 +104,60 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   time_t now = time(NULL);
   struct tm *t = localtime(&now);
 
-  // minute/hour hand
+  // minute/hour hands
   GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
+  uint32_t radius = bounds.size.w/2; 
+
+  GPathInfo HOUR_HAND_INFO = (GPathInfo) {
+    .num_points = 9,
+    .points = (GPoint[9]) {
+      {-3, 4},
+      {-3, -radius + PBL_IF_ROUND_ELSE(62,48)},
+      {-7, -radius + PBL_IF_ROUND_ELSE(60,46)},
+      {-8, -radius + PBL_IF_ROUND_ELSE(54,40)},
+      {0, -radius + PBL_IF_ROUND_ELSE(42,28)},
+      {8, -radius + PBL_IF_ROUND_ELSE(54,40)},
+      {7, -radius + PBL_IF_ROUND_ELSE(60,46)},
+      {3, -radius + PBL_IF_ROUND_ELSE(62,48)},
+      {3, 4}
+    }
+  };
   
-  pdc_transform_gdraw_command_image_draw_transformed(
-    ctx,
-    s_hour_hand,
-    PBL_IF_ROUND_ELSE(GPoint(centre.x-10,centre.y-45), GPoint(centre.x-8,centre.y-40)), // origin
-    PBL_IF_ROUND_ELSE(12.5, 10), // scale
-    (360 * (((t->tm_hour % 12) * 6) + (t->tm_min / 10))) / (12 * 6));
+  GPathInfo MINUTE_HAND_INFO = (GPathInfo) {
+    .num_points = 9,
+    .points = (GPoint[9]) {
+      {-3, 4},
+      {-3, -radius + PBL_IF_ROUND_ELSE(42,34)},
+      {-7, -radius + PBL_IF_ROUND_ELSE(40,32)},
+      {-8, -radius + PBL_IF_ROUND_ELSE(34,26)},
+      {0, -radius + PBL_IF_ROUND_ELSE(22,14)},
+      {8, -radius + PBL_IF_ROUND_ELSE(34,26)},
+      {7, -radius + PBL_IF_ROUND_ELSE(40,32)},
+      {3, -radius + PBL_IF_ROUND_ELSE(42,34)},
+      {3, 4}
+    }
+  };
+
+  GPath *s_h_hand = gpath_create(&HOUR_HAND_INFO);
+  GPath *s_m_hand = gpath_create(&MINUTE_HAND_INFO);
   
-  pdc_transform_gdraw_command_image_draw_transformed(
-    ctx,
-    s_minute_hand,
-    PBL_IF_ROUND_ELSE(GPoint(centre.x-10,centre.y-72), GPoint(centre.x-8,centre.y-60)), // origin
-    PBL_IF_ROUND_ELSE(12.5, 10), // scale
-    360 * t->tm_min / 60);
+  gpath_move_to(s_h_hand, centre);
+  gpath_move_to(s_m_hand, centre);
+  gpath_rotate_to(s_h_hand, (TRIG_MAX_ANGLE * (((t->tm_hour % 12) * 6) + (t->tm_min / 10))) / (12 * 6));
+  gpath_rotate_to(s_m_hand, TRIG_MAX_ANGLE * t->tm_min / 60);
+
+  graphics_context_set_fill_color(ctx, settings.HandColour);
+  gpath_draw_filled(ctx, s_h_hand);
+  gpath_draw_filled(ctx, s_m_hand);
+
+  graphics_context_set_stroke_color(ctx, settings.HandOutlineColour);
+  gpath_draw_outline(ctx, s_h_hand);
+  gpath_draw_outline(ctx, s_m_hand);
+
+  gpath_destroy(s_h_hand);
+  gpath_destroy(s_m_hand);
 
   // dot in the middle
-  uint32_t radius = bounds.size.w/2; 
-  graphics_context_set_fill_color(ctx, settings.HandColour);
-  graphics_context_set_stroke_color(ctx, settings.HandOutlineColour);
   GRect frame = grect_inset(bounds, GEdgeInsets(11*radius/12));
   graphics_fill_radial(ctx, frame, GOvalScaleModeFitCircle, radius, 0, DEG_TO_TRIGANGLE(360));
   graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
@@ -136,8 +169,6 @@ static void prv_window_load(Window *window) {
 
   s_label_font = fonts_load_custom_font(resource_get_handle(PBL_IF_ROUND_ELSE(RESOURCE_ID_FONT_LABEL_15, RESOURCE_ID_FONT_LABEL_13)));
 
-  s_minute_hand = gdraw_command_image_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_IMAGE_MINUTE_HAND, RESOURCE_ID_IMAGE_MINUTE_HAND_BW));
-  s_hour_hand = gdraw_command_image_create_with_resource(PBL_IF_COLOR_ELSE(RESOURCE_ID_IMAGE_HOUR_HAND, RESOURCE_ID_IMAGE_HOUR_HAND_BW));
   s_bg = gdraw_command_image_create_with_resource(RESOURCE_ID_IMAGE_BG);
 
   bluetooth_callback(connection_service_peek_pebble_app_connection());
@@ -159,8 +190,6 @@ static void prv_window_unload(Window *window) {
   layer_destroy(s_hands_layer);
   layer_destroy(s_clock_layer);
   fonts_unload_custom_font(s_label_font);
-  gdraw_command_image_destroy(s_minute_hand);
-  gdraw_command_image_destroy(s_hour_hand);
   gdraw_command_image_destroy(s_bg);
   if (s_window) { window_destroy(s_window); }
 }
