@@ -1,0 +1,73 @@
+[
+  {
+    "type": "heading",
+    "defaultValue": "Rokkenjima Watchface"
+  },
+  {
+    "type": "section",
+    "items": [
+      {
+        "type": "color",
+        "messageKey": "BackgroundColour",
+        "defaultValue": "0x000000",
+        "label": "Background Colour",
+        "description": "Change background colour",
+        "defaultValue": "0x000000"
+      },
+      {
+        "type": "color",
+        "messageKey": "ClockColour",
+        "label": "Clock Colour",
+        "description": "Change clock face colour",
+        "defaultValue": "0xFFFFAA"
+      },
+      {
+        "type": "toggle",
+        "messageKey": "ShowClockPattern",
+        "label": "Show Clock Pattern",
+        "description": "Display floral pattern on clock face",
+        "defaultValue": true
+      },
+      {
+        "type": "color",
+        "messageKey": "HandColour",
+        "label": "Hand Colour",
+        "description": "Change the fill colour of the clock hands",
+        "defaultValue": "0xFFFF00"
+      },
+      {
+        "type": "color",
+        "messageKey": "HandOutlineColour",
+        "label": "Hand Outline Colour",
+        "description": "Change the stroke colour of the clock hands",
+        "defaultValue": "0xAA5500"
+      },
+      {
+        "type": "toggle",
+        "messageKey": "HourOverMinute",
+        "label": "Hour Hand Over Minute Hand",
+        "description": "Hour hand will be drawn on top of the minute hand",
+        "defaultValue": false
+      },
+      {
+        "type": "toggle",
+        "messageKey": "BtVibration",
+        "label": "Vibrate on Disconnect",
+        "description": "Enable/disable watch vibration on Bluetooth disconnect",
+        "defaultValue": true
+      },
+      {
+        "type": "color",
+        "messageKey": "BtBackgroundColour",
+        "label": "Background Colour on Disconnect",
+        "description": "Change background colour on Bluetooth disconnect",
+        "defaultValue": "0xFF0000"
+      }
+    ]
+  },
+  {
+    "type": "submit",
+    "defaultValue": "Save Settings"
+  }
+]
+
