@@ -10,6 +10,7 @@ typedef struct ClaySettings {
   GColor HandColour;
   GColor HandOutlineColour;
   bool HourOverMinute;
+  bool HourlyVibration;
   bool BtVibration;
   GColor BtBackgroundColour;
 } ClaySettings;

@@ -104,6 +104,16 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   time_t now = time(NULL);
   struct tm *t = localtime(&now);
   
+  // Hourly vibration
+  if (settings.HourlyVibration && t->tm_min == 0) {
+    static const uint32_t const segments[] = { 400, 100, 150 };
+    VibePattern pat = {
+      .durations = segments,
+      .num_segments = ARRAY_LENGTH(segments),
+    };
+    vibes_enqueue_custom_pattern(pat);
+  }
+
   GRect bounds = layer_get_bounds(layer);
 
   // Minute/hour hands
