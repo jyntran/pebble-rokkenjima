@@ -8,6 +8,8 @@ static void prv_default_settings() {
   settings.HandOutlineColour = PBL_IF_COLOR_ELSE(GColorWindsorTan, GColorWhite);
   settings.HourlyVibration = false;
   settings.HourOverMinute = false;
+  settings.DigitalQuickView = true;
+  settings.DigitalQuickViewColour = PBL_IF_COLOR_ELSE(GColorBlack, GColorBlack);
   settings.BtVibration = true;
   settings.BtBackgroundColour = PBL_IF_COLOR_ELSE(GColorRed, GColorWhite);
 }
@@ -51,6 +53,16 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   Tuple *hvb_bool_t = dict_find(iter, MESSAGE_KEY_HourlyVibration);
     if (hvb_bool_t) {
       settings.HourlyVibration = hvb_bool_t->value->int32 == 1;
+  }
+
+  Tuple *dqv_bool_t = dict_find(iter, MESSAGE_KEY_DigitalQuickView);
+    if (dqv_bool_t) {
+      settings.DigitalQuickView = dqv_bool_t->value->int32 == 1;
+  }
+
+  Tuple *dqv_colour_t = dict_find(iter, MESSAGE_KEY_DigitalQuickViewColour);
+  if (dqv_colour_t) {
+    settings.DigitalQuickViewColour = GColorFromHEX(dqv_colour_t->value->int32);
   }
 
   Tuple *bt_bool_t = dict_find(iter, MESSAGE_KEY_BtVibration);

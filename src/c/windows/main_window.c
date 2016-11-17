@@ -1,14 +1,46 @@
 #include "main_window.h"
 
 static Window *s_window;
-static Layer *s_clock_layer, *s_hands_layer;
+static Layer *s_window_layer, *s_clock_layer, *s_hands_layer;
+static TextLayer *s_digital_layer;
 static GDrawCommandImage *s_bg;
-static GFont s_label_font;
+static GFont s_label_font, s_digital_font;
+
+static void update_digital() {
+  time_t temp = time(NULL);
+  struct tm *tick_time = localtime(&temp);
+  static char s_buffer_time[6];
+  strftime(s_buffer_time, sizeof(s_buffer_time), clock_is_24h_style() ?
+                                          "%H:%M" : "%I:%M", tick_time);
+  text_layer_set_text(s_digital_layer, s_buffer_time);
+}
 
 void prv_window_update() {
   window_set_background_color(s_window, settings.BackgroundColour);
   layer_mark_dirty(s_clock_layer);
   layer_mark_dirty(s_hands_layer);
+  if (settings.DigitalQuickView) {
+    update_digital();
+  }
+}
+
+static void prv_unobstructed_will_change(GRect final_unobstructed_screen_area, void *context) {
+  GRect full_bounds = layer_get_bounds(s_window_layer);
+  if (grect_equal(&full_bounds, &final_unobstructed_screen_area)) {
+    if (settings.DigitalQuickView) {
+      layer_set_hidden(text_layer_get_layer(s_digital_layer), true);
+    }
+  } 
+}
+
+static void prv_unobstructed_did_change(void *context) {
+  GRect full_bounds = layer_get_bounds(s_window_layer);
+  GRect bounds = layer_get_unobstructed_bounds(s_window_layer);
+  if (!grect_equal(&full_bounds, &bounds)) {
+    if (settings.DigitalQuickView) {
+      layer_set_hidden(text_layer_get_layer(s_digital_layer), false);
+    }
+  }
 }
 
 void bluetooth_callback(bool connected) {
@@ -30,9 +62,17 @@ void bluetooth_callback(bool connected) {
 
 static void clock_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
+  GRect unobstructed_bounds = layer_get_unobstructed_bounds(layer);
+  int16_t obstruction_height = bounds.size.h - unobstructed_bounds.size.h;
   
   // White clockface
-  GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
+  GPoint centre;
+  if (obstruction_height == 0) {
+    centre = GPoint(bounds.size.w/2, bounds.size.h/2);
+  } else {
+    bounds = GRect(0, 0, bounds.size.w, bounds.size.w);
+    centre = GPoint(bounds.size.w/2, bounds.size.w/2);
+  }
   uint16_t radius = bounds.size.w/2;
   graphics_context_set_fill_color(ctx, settings.ClockColour);
   graphics_fill_radial(ctx, bounds, GOvalScaleModeFitCircle, radius, 0, DEG_TO_TRIGANGLE(360));
@@ -105,9 +145,18 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   struct tm *t = localtime(&now);
   
   GRect bounds = layer_get_bounds(layer);
-
+  GRect unobstructed_bounds = layer_get_unobstructed_bounds(layer);
+  int16_t obstruction_height = bounds.size.h - unobstructed_bounds.size.h;
+  
   // Minute/hour hands
-  GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
+  GPoint centre;
+  if (obstruction_height == 0) {
+    centre = GPoint(bounds.size.w/2, bounds.size.h/2);
+  } else {
+    bounds = GRect(0, 0, bounds.size.w, bounds.size.w);
+    centre = GPoint(bounds.size.w/2, bounds.size.w/2);
+  }
+
   uint32_t radius = bounds.size.w/2; 
 
   GPathInfo HOUR_HAND_INFO = (GPathInfo) {
@@ -173,8 +222,8 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
 }
 
 static void prv_window_load(Window *window) {
-  Layer *window_layer = window_get_root_layer(window);
-  GRect bounds = layer_get_bounds(window_layer);
+  s_window_layer = window_get_root_layer(window);
+  GRect bounds = layer_get_bounds(s_window_layer);
 
   s_label_font = fonts_load_custom_font(resource_get_handle(PBL_IF_ROUND_ELSE(RESOURCE_ID_FONT_LABEL_14, RESOURCE_ID_FONT_LABEL_13)));
 
@@ -187,12 +236,39 @@ static void prv_window_load(Window *window) {
   // Clock layer
   s_clock_layer = layer_create(bounds);
   layer_set_update_proc(s_clock_layer, clock_update_proc);
-  layer_add_child(window_layer, s_clock_layer);
+  layer_add_child(s_window_layer, s_clock_layer);
 
   // Hands layer
   s_hands_layer = layer_create(bounds);
   layer_set_update_proc(s_hands_layer, hands_update_proc);
-  layer_add_child(window_layer, s_hands_layer);
+  layer_add_child(s_window_layer, s_hands_layer);
+
+  // Digital quick view layer
+  if (settings.DigitalQuickView) {
+    s_digital_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_LABEL_24));
+    GRect unobstructed_bounds = layer_get_unobstructed_bounds(s_window_layer);
+    GRect digital_bounds = GRect(0,
+                                 bounds.size.h/2 + (DIGITALHEIGHT/4),
+                                 bounds.size.w,
+                                 DIGITALHEIGHT
+    );
+    s_digital_layer = text_layer_create(digital_bounds);
+    text_layer_set_text_alignment(s_digital_layer, GTextAlignmentCenter);
+    text_layer_set_background_color(s_digital_layer, GColorClear);
+    text_layer_set_text_color(s_digital_layer, settings.DigitalQuickViewColour);
+    text_layer_set_font(s_digital_layer, s_digital_font);
+    layer_add_child(s_window_layer, text_layer_get_layer(s_digital_layer));
+
+    if (grect_equal(&bounds, &unobstructed_bounds)) {
+      layer_set_hidden(text_layer_get_layer(s_digital_layer), true);
+    }
+  }
+
+  UnobstructedAreaHandlers handlers = {
+    .will_change = prv_unobstructed_will_change,
+    .did_change = prv_unobstructed_did_change
+  };
+  unobstructed_area_service_subscribe(handlers, NULL);
 
   prv_window_update();
 }
@@ -200,6 +276,10 @@ static void prv_window_load(Window *window) {
 static void prv_window_unload(Window *window) {
   layer_destroy(s_hands_layer);
   layer_destroy(s_clock_layer);
+  if (settings.DigitalQuickView) {
+    text_layer_destroy(s_digital_layer);
+    fonts_unload_custom_font(s_digital_font);
+  }
   fonts_unload_custom_font(s_label_font);
   gdraw_command_image_destroy(s_bg);
   if (s_window) { window_destroy(s_window); }
