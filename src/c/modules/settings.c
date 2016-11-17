@@ -1,7 +1,5 @@
 #include "settings.h"
 
-struct ClaySettings settings;
-
 static void prv_default_settings() {
   settings.BackgroundColour = GColorBlack;
   settings.ClockColour = PBL_IF_COLOR_ELSE(GColorPastelYellow, GColorWhite);

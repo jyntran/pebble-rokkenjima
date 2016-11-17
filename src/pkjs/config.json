@@ -51,6 +51,13 @@
       },
       {
         "type": "toggle",
+        "messageKey": "HourlyVibration",
+        "label": "Hourly Vibration",
+        "description": "Watch will vibrate every hour on the hour",
+        "defaultValue": false
+      },
+      {
+        "type": "toggle",
         "messageKey": "BtVibration",
         "label": "Vibrate on Disconnect",
         "description": "Enable/disable watch vibration on Bluetooth disconnect",
