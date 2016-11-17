@@ -4,7 +4,7 @@ static Window *s_window;
 static Layer *s_window_layer, *s_clock_layer, *s_hands_layer;
 static TextLayer *s_digital_layer;
 static GDrawCommandImage *s_bg;
-static GFont s_label_font, s_digital_font;
+static GFont s_label_font, s_label_small_font, s_digital_font;
 
 static void update_digital() {
   time_t temp = time(NULL);
@@ -66,14 +66,11 @@ static void clock_update_proc(Layer *layer, GContext *ctx) {
   int16_t obstruction_height = bounds.size.h - unobstructed_bounds.size.h;
   
   // White clockface
-  GPoint centre;
-  if (obstruction_height == 0) {
-    centre = GPoint(bounds.size.w/2, bounds.size.h/2);
-  } else {
-    bounds = GRect(0, 0, bounds.size.w, bounds.size.w);
-    centre = GPoint(bounds.size.w/2, bounds.size.w/2);
+  if (!obstruction_height == 0) {
+    bounds = unobstructed_bounds;
   }
-  uint16_t radius = bounds.size.w/2;
+  GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
+  uint16_t radius = bounds.size.h < bounds.size.w ? bounds.size.h/2 : bounds.size.w/2;
   graphics_context_set_fill_color(ctx, settings.ClockColour);
   graphics_fill_radial(ctx, bounds, GOvalScaleModeFitCircle, radius, 0, DEG_TO_TRIGANGLE(360));
 
@@ -113,8 +110,8 @@ static void clock_update_proc(Layer *layer, GContext *ctx) {
 
   for (int i=0; i <12; i++) {
     int angle = (TRIG_MAX_ANGLE * (i % 12) * 6) / (12 * 6);
-    int x = (centre.x - (LABELWIDTH/2)) + (sin_lookup(angle) * (radius-PBL_IF_ROUND_ELSE(24,16)) / TRIG_MAX_RATIO);
-    int y = (centre.y - (LABELHEIGHT/2)) + (-cos_lookup(angle) * (radius-PBL_IF_ROUND_ELSE(24,16)) / TRIG_MAX_RATIO);
+    int x = (centre.x - (LABELWIDTH/2)) + (sin_lookup(angle) * (radius-PBL_IF_ROUND_ELSE(radius/3.5, radius/4.5)) / TRIG_MAX_RATIO);
+    int y = (centre.y - (LABELHEIGHT/2)) + (-cos_lookup(angle) * (radius-PBL_IF_ROUND_ELSE(radius/3.5, radius/4.5)) / TRIG_MAX_RATIO);
   
     if (i==0) { // red 12
       graphics_context_set_text_color(ctx, GColorRed);
@@ -132,7 +129,7 @@ static void clock_update_proc(Layer *layer, GContext *ctx) {
     graphics_draw_text(
       ctx,
       LABELS[i].text,
-      s_label_font,
+      obstruction_height > 0 ? s_label_small_font : s_label_font,
       pos,
       GTextOverflowModeWordWrap,
       GTextAlignmentCenter,
@@ -149,15 +146,11 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   int16_t obstruction_height = bounds.size.h - unobstructed_bounds.size.h;
   
   // Minute/hour hands
-  GPoint centre;
-  if (obstruction_height == 0) {
-    centre = GPoint(bounds.size.w/2, bounds.size.h/2);
-  } else {
-    bounds = GRect(0, 0, bounds.size.w, bounds.size.w);
-    centre = GPoint(bounds.size.w/2, bounds.size.w/2);
+  if (!obstruction_height == 0) {
+    bounds = unobstructed_bounds;
   }
-
-  uint32_t radius = bounds.size.w/2; 
+  GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
+  uint16_t radius = bounds.size.h < bounds.size.w ? bounds.size.h/2 : bounds.size.w/2;
 
   GPathInfo HOUR_HAND_INFO = (GPathInfo) {
     .num_points = 9,
@@ -226,6 +219,7 @@ static void prv_window_load(Window *window) {
   GRect bounds = layer_get_bounds(s_window_layer);
 
   s_label_font = fonts_load_custom_font(resource_get_handle(PBL_IF_ROUND_ELSE(RESOURCE_ID_FONT_LABEL_14, RESOURCE_ID_FONT_LABEL_13)));
+  s_label_small_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_LABEL_12));
 
   if (settings.ShowClockPattern) {
     s_bg = gdraw_command_image_create_with_resource(RESOURCE_ID_IMAGE_BG);
@@ -281,6 +275,7 @@ static void prv_window_unload(Window *window) {
     fonts_unload_custom_font(s_digital_font);
   }
   fonts_unload_custom_font(s_label_font);
+  fonts_unload_custom_font(s_label_small_font);
   gdraw_command_image_destroy(s_bg);
   if (s_window) { window_destroy(s_window); }
 }

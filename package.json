@@ -58,6 +58,12 @@
           "file": "fonts/LinLibertine_RB.ttf"
         },
         {
+          "characterRegex": "[IVX]",
+          "type": "font",
+          "name": "FONT_LABEL_12",
+          "file": "fonts/LinLibertine_RB.ttf"
+        },
+        {
           "type": "raw",
           "name": "IMAGE_BG",
           "file": "images/bg.pdc"
