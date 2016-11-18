@@ -2,34 +2,18 @@
 
 static Window *s_window;
 static Layer *s_window_layer, *s_clock_layer, *s_hands_layer;
-static TextLayer *s_digital_layer;
 static GDrawCommandImage *s_bg;
-static GFont s_label_font, s_label_small_font, s_digital_font;
-
-static void update_digital() {
-  time_t temp = time(NULL);
-  struct tm *tick_time = localtime(&temp);
-  static char s_buffer_time[6];
-  strftime(s_buffer_time, sizeof(s_buffer_time), clock_is_24h_style() ?
-                                          "%H:%M" : "%I:%M", tick_time);
-  text_layer_set_text(s_digital_layer, s_buffer_time);
-}
+static GFont s_label_font, s_label_small_font;
 
 void prv_window_update() {
   window_set_background_color(s_window, settings.BackgroundColour);
   layer_mark_dirty(s_clock_layer);
   layer_mark_dirty(s_hands_layer);
-  if (settings.DigitalQuickView) {
-    update_digital();
-  }
 }
 
 static void prv_unobstructed_will_change(GRect final_unobstructed_screen_area, void *context) {
   GRect full_bounds = layer_get_bounds(s_window_layer);
   if (grect_equal(&full_bounds, &final_unobstructed_screen_area)) {
-    if (settings.DigitalQuickView) {
-      layer_set_hidden(text_layer_get_layer(s_digital_layer), true);
-    }
   } 
 }
 
@@ -37,9 +21,6 @@ static void prv_unobstructed_did_change(void *context) {
   GRect full_bounds = layer_get_bounds(s_window_layer);
   GRect bounds = layer_get_unobstructed_bounds(s_window_layer);
   if (!grect_equal(&full_bounds, &bounds)) {
-    if (settings.DigitalQuickView) {
-      layer_set_hidden(text_layer_get_layer(s_digital_layer), false);
-    }
   }
 }
 
@@ -259,27 +240,6 @@ static void prv_window_load(Window *window) {
   layer_set_update_proc(s_hands_layer, hands_update_proc);
   layer_add_child(s_window_layer, s_hands_layer);
 
-  // Digital quick view layer
-  if (settings.DigitalQuickView) {
-    s_digital_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_LABEL_24));
-    GRect unobstructed_bounds = layer_get_unobstructed_bounds(s_window_layer);
-    GRect digital_bounds = GRect(0,
-                                 bounds.size.h/2 + (DIGITALHEIGHT/4),
-                                 bounds.size.w,
-                                 DIGITALHEIGHT
-    );
-    s_digital_layer = text_layer_create(digital_bounds);
-    text_layer_set_text_alignment(s_digital_layer, GTextAlignmentCenter);
-    text_layer_set_background_color(s_digital_layer, GColorClear);
-    text_layer_set_text_color(s_digital_layer, settings.DigitalQuickViewColour);
-    text_layer_set_font(s_digital_layer, s_digital_font);
-    layer_add_child(s_window_layer, text_layer_get_layer(s_digital_layer));
-
-    if (grect_equal(&bounds, &unobstructed_bounds)) {
-      layer_set_hidden(text_layer_get_layer(s_digital_layer), true);
-    }
-  }
-
   UnobstructedAreaHandlers handlers = {
     .will_change = prv_unobstructed_will_change,
     .did_change = prv_unobstructed_did_change
@@ -292,10 +252,6 @@ static void prv_window_load(Window *window) {
 static void prv_window_unload(Window *window) {
   layer_destroy(s_hands_layer);
   layer_destroy(s_clock_layer);
-  if (settings.DigitalQuickView) {
-    text_layer_destroy(s_digital_layer);
-    fonts_unload_custom_font(s_digital_font);
-  }
   fonts_unload_custom_font(s_label_font);
   fonts_unload_custom_font(s_label_small_font);
   gdraw_command_image_destroy(s_bg);

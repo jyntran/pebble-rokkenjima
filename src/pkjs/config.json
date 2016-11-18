@@ -58,20 +58,6 @@
       },
       {
         "type": "toggle",
-        "messageKey": "DigitalQuickView",
-        "label": "Digital Time during Quick View",
-        "description": "Display digital time during Timeline Quick View",
-        "defaultValue": true
-      },
-      {
-        "type": "color",
-        "messageKey": "DigitalQuickViewColour",
-        "label": "Digital Time during Quick View Colour",
-        "description": "Change the digital time colour during Timeline Quick View",
-        "defaultValue": "0x000000"
-      },
-      {
-        "type": "toggle",
         "messageKey": "BtVibration",
         "label": "Vibrate on Disconnect",
         "description": "Enable/disable watch vibration on Bluetooth disconnect",

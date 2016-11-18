@@ -4,7 +4,7 @@
 #include "windows/main_window.h"
 
 static void tick_handler(struct tm *tick_time, TimeUnits units_changed) {
-  if (units_changed & HOUR_UNIT) {
+  if (settings.HourlyVibration && units_changed & HOUR_UNIT) {
     static const uint32_t const segments[] = { 400, 100, 150 };
     VibePattern pat = {
       .durations = segments,
