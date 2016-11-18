@@ -87,9 +87,9 @@ static void clock_update_proc(Layer *layer, GContext *ctx) {
   graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
   frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(10, 6)));
   graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
-  frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(64, 48)));
+  frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(64, 3*radius/4-2)));
   graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
-  frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(66, 50)));
+  frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(66, 3*radius/4)));
   graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
 
   // Numbers
@@ -155,6 +155,7 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   GPathInfo HOUR_HAND_INFO = (GPathInfo) {
     .num_points = 9,
     .points = (GPoint[9]) {
+/*
       {-3, 4},
       {-3, -radius + PBL_IF_ROUND_ELSE(62,48)},
       {-7, -radius + PBL_IF_ROUND_ELSE(60,46)},
@@ -164,12 +165,23 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
       {7, -radius + PBL_IF_ROUND_ELSE(60,46)},
       {3, -radius + PBL_IF_ROUND_ELSE(62,48)},
       {3, 4}
+*/
+      {-3, 4},
+      {-3, -radius + PBL_IF_ROUND_ELSE(radius/2 +2, radius/2 +12)},
+      {-7, -radius + PBL_IF_ROUND_ELSE(radius/2, radius/2 +10)},
+      {-8, -radius + PBL_IF_ROUND_ELSE(radius/2 -6, radius/2 +6)},
+      {0, -radius + PBL_IF_ROUND_ELSE(radius/2 -20, radius/2 -10)},
+      {8, -radius + PBL_IF_ROUND_ELSE(radius/2 -6, radius/2 +6)},
+      {7, -radius + PBL_IF_ROUND_ELSE(radius/2, radius/2 +10)},
+      {3, -radius + PBL_IF_ROUND_ELSE(radius/2 +2, radius/2 +12)},
+      {3, 4}
     }
   };
   
   GPathInfo MINUTE_HAND_INFO = (GPathInfo) {
     .num_points = 9,
     .points = (GPoint[9]) {
+/*
       {-3, 4},
       {-3, -radius + PBL_IF_ROUND_ELSE(42,34)},
       {-7, -radius + PBL_IF_ROUND_ELSE(40,32)},
@@ -178,6 +190,16 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
       {8, -radius + PBL_IF_ROUND_ELSE(34,26)},
       {7, -radius + PBL_IF_ROUND_ELSE(40,32)},
       {3, -radius + PBL_IF_ROUND_ELSE(42,34)},
+      {3, 4}
+*/
+      {-3, 4},
+      {-3, -radius + PBL_IF_ROUND_ELSE(radius/3 +2, radius/3 +12)},
+      {-7, -radius + PBL_IF_ROUND_ELSE(radius/3, radius/3 +10)},
+      {-8, -radius + PBL_IF_ROUND_ELSE(radius/3 -6, radius/3 +6)},
+      {0, -radius + PBL_IF_ROUND_ELSE(radius/3 -20, radius/3 -10)},
+      {8, -radius + PBL_IF_ROUND_ELSE(radius/3 -6, radius/3 +6)},
+      {7, -radius + PBL_IF_ROUND_ELSE(radius/3, radius/3 +10)},
+      {3, -radius + PBL_IF_ROUND_ELSE(radius/3 +2, radius/3 +12)},
       {3, 4}
     }
   };
