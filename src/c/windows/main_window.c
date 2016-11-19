@@ -56,21 +56,33 @@ static void clock_update_proc(Layer *layer, GContext *ctx) {
   graphics_fill_radial(ctx, bounds, GOvalScaleModeFitCircle, radius, 0, DEG_TO_TRIGANGLE(360));
 
   // Background
-  if (settings.ShowClockPattern) {
-    gdraw_command_image_draw(ctx, s_bg, GPoint(centre.x-52, centre.y-50));
+  if (settings.ShowClockPattern && obstruction_height == 0) {
+    GPoint origin;
+    uint16_t scale = 10;
+    if (radius == 72) {
+      origin = GPoint(centre.x-52, centre.y-50);
+      scale = 10;
+    } else if (radius == 90) {
+      origin = GPoint(centre.x-62, centre.y-60);
+      scale = 12;
+    } else if (radius == 100) {
+      origin = GPoint(centre.x-72, centre.y-70);
+      scale = 14;
+    }
+    pdc_transform_gdraw_command_image_draw_transformed(ctx, s_bg, origin, scale, 0);
   }
 
   // Border
   GRect frame;
   graphics_context_set_stroke_color(ctx, GColorDarkGray);
   graphics_context_set_stroke_width(ctx, 1);
-  frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(8, 4)));
+  frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(6, 4)));
   graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
-  frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(10, 6)));
+  frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(8, 6)));
   graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
-  frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(64, 3*radius/4-2)));
+  frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(2*radius/3, 2*radius/3-2)));
   graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
-  frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(66, 3*radius/4)));
+  frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(2*radius/3+2, 2*radius/3)));
   graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
 
   // Numbers
@@ -89,10 +101,28 @@ static void clock_update_proc(Layer *layer, GContext *ctx) {
     {11, "XI"}      
   };
 
+  uint16_t LABELHEIGHT = 0;
+  uint16_t LABELWIDTH = 0;
+  uint16_t LABELDISTANCE = radius-radius/4;
+  switch (PBL_PLATFORM_TYPE_CURRENT) {
+      break;
+    case PlatformTypeChalk:
+      LABELHEIGHT = C_LABELHEIGHT;
+      LABELWIDTH = C_LABELWIDTH;
+      break;
+    case PlatformTypeEmery:
+      LABELHEIGHT = E_LABELHEIGHT;
+      LABELWIDTH = E_LABELWIDTH;
+      break;
+    default:
+      LABELHEIGHT = ABD_LABELHEIGHT;
+      LABELWIDTH = ABD_LABELWIDTH;
+  }
+
   for (int i=0; i <12; i++) {
     int angle = (TRIG_MAX_ANGLE * (i % 12) * 6) / (12 * 6);
-    int x = (centre.x - (LABELWIDTH/2)) + (sin_lookup(angle) * (radius-PBL_IF_ROUND_ELSE(radius/3.5, radius/4.5)) / TRIG_MAX_RATIO);
-    int y = (centre.y - (LABELHEIGHT/2)) + (-cos_lookup(angle) * (radius-PBL_IF_ROUND_ELSE(radius/3.5, radius/4.5)) / TRIG_MAX_RATIO);
+    int x = (centre.x - (LABELWIDTH/2)) + (sin_lookup(angle) * LABELDISTANCE / TRIG_MAX_RATIO);
+    int y = (centre.y - (LABELHEIGHT/2)) + (-cos_lookup(angle) * LABELDISTANCE / TRIG_MAX_RATIO);
   
     if (i==0) { // red 12
       graphics_context_set_text_color(ctx, GColorRed);
@@ -146,7 +176,6 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
       {7, -radius + PBL_IF_ROUND_ELSE(60,46)},
       {3, -radius + PBL_IF_ROUND_ELSE(62,48)},
       {3, 4}
-*/
       {-3, 4},
       {-3, -radius + PBL_IF_ROUND_ELSE(radius/2 +2, radius/2 +12)},
       {-7, -radius + PBL_IF_ROUND_ELSE(radius/2, radius/2 +10)},
@@ -155,6 +184,16 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
       {8, -radius + PBL_IF_ROUND_ELSE(radius/2 -6, radius/2 +6)},
       {7, -radius + PBL_IF_ROUND_ELSE(radius/2, radius/2 +10)},
       {3, -radius + PBL_IF_ROUND_ELSE(radius/2 +2, radius/2 +12)},
+      {3, 4}
+*/
+      {-3, 4},
+      {-3, -radius + radius/2 +12},
+      {-7, -radius + radius/2 +10},
+      {-8, -radius + radius/2 +6},
+      {0, -radius + radius/2 -10},
+      {8, -radius + radius/2 +6},
+      {7, -radius + radius/2 +10},
+      {3, -radius + radius/2 +12},
       {3, 4}
     }
   };
@@ -172,7 +211,6 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
       {7, -radius + PBL_IF_ROUND_ELSE(40,32)},
       {3, -radius + PBL_IF_ROUND_ELSE(42,34)},
       {3, 4}
-*/
       {-3, 4},
       {-3, -radius + PBL_IF_ROUND_ELSE(radius/3 +2, radius/3 +12)},
       {-7, -radius + PBL_IF_ROUND_ELSE(radius/3, radius/3 +10)},
@@ -181,6 +219,16 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
       {8, -radius + PBL_IF_ROUND_ELSE(radius/3 -6, radius/3 +6)},
       {7, -radius + PBL_IF_ROUND_ELSE(radius/3, radius/3 +10)},
       {3, -radius + PBL_IF_ROUND_ELSE(radius/3 +2, radius/3 +12)},
+      {3, 4}
+*/
+      {-3, 4},
+      {-3, -radius + radius/3 +12},
+      {-7, -radius + radius/3 +10},
+      {-8, -radius + radius/3 +6},
+      {0, -radius + radius/3 -10},
+      {8, -radius + radius/3 +6},
+      {7, -radius + radius/3 +10},
+      {3, -radius + radius/3 +12},
       {3, 4}
     }
   };
@@ -221,8 +269,19 @@ static void prv_window_load(Window *window) {
   s_window_layer = window_get_root_layer(window);
   GRect bounds = layer_get_bounds(s_window_layer);
 
-  s_label_font = fonts_load_custom_font(resource_get_handle(PBL_IF_ROUND_ELSE(RESOURCE_ID_FONT_LABEL_14, RESOURCE_ID_FONT_LABEL_13)));
-  s_label_small_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_LABEL_12));
+  switch (PBL_PLATFORM_TYPE_CURRENT) {
+    case PlatformTypeChalk:
+      s_label_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_LABEL_16));
+      s_label_small_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_LABEL_13));
+      break;
+    case PlatformTypeEmery:
+      s_label_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_LABEL_18));
+      s_label_small_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_LABEL_16));
+      break;
+    default:
+      s_label_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_LABEL_13));
+      s_label_small_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_LABEL_11));
+  }
 
   if (settings.ShowClockPattern) {
     s_bg = gdraw_command_image_create_with_resource(RESOURCE_ID_IMAGE_BG);
