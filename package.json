@@ -19,8 +19,7 @@
       "aplite",
       "basalt",
       "chalk",
-      "diorite",
-      "emery"
+      "diorite"
     ],
     "watchapp": {
       "watchface": true
@@ -66,6 +65,18 @@
           "characterRegex": "[IVX]",
           "type": "font",
           "name": "FONT_LABEL_18",
+          "file": "fonts/LinLibertine_RB.ttf"
+        },
+        {
+          "characterRegex": "[IVX]",
+          "type": "font",
+          "name": "FONT_LABEL_20",
+          "file": "fonts/LinLibertine_RB.ttf"
+        },
+        {
+          "characterRegex": "[IVX]",
+          "type": "font",
+          "name": "FONT_LABEL_24",
           "file": "fonts/LinLibertine_RB.ttf"
         },
         {

@@ -56,18 +56,37 @@ static void clock_update_proc(Layer *layer, GContext *ctx) {
   graphics_fill_radial(ctx, bounds, GOvalScaleModeFitCircle, radius, 0, DEG_TO_TRIGANGLE(360));
 
   // Background
-  if (settings.ShowClockPattern && obstruction_height == 0) {
+  if (settings.ShowClockPattern) {
     GPoint origin;
     uint16_t scale = 10;
-    if (radius == 72) {
-      origin = GPoint(centre.x-52, centre.y-50);
-      scale = 10;
-    } else if (radius == 90) {
-      origin = GPoint(centre.x-62, centre.y-60);
-      scale = 12;
-    } else if (radius == 100) {
-      origin = GPoint(centre.x-72, centre.y-70);
-      scale = 14;
+    if (obstruction_height == 0) {
+    switch (PBL_PLATFORM_TYPE_CURRENT) {
+      case PlatformTypeChalk:
+        origin = GPoint(centre.x-62, centre.y-60);
+        scale = 12;
+        break;
+      case PlatformTypeEmery:
+        origin = GPoint(centre.x-72, centre.y-70);
+        scale = 14;
+        break;
+      default:
+        origin = GPoint(centre.x-52, centre.y-50);
+        scale = 10;
+    }
+    } else {
+    switch (PBL_PLATFORM_TYPE_CURRENT) {
+      case PlatformTypeChalk:
+        origin = GPoint(centre.x-52, centre.y-50);
+        scale = 10;
+        break;
+      case PlatformTypeEmery:
+        origin = GPoint(centre.x-62, centre.y-60);
+        scale = 12;
+        break;
+      default:
+        origin = GPoint(centre.x-40, centre.y-40);
+        scale = 8;
+    }
     }
     pdc_transform_gdraw_command_image_draw_transformed(ctx, s_bg, origin, scale, 0);
   }
@@ -105,7 +124,6 @@ static void clock_update_proc(Layer *layer, GContext *ctx) {
   uint16_t LABELWIDTH = 0;
   uint16_t LABELDISTANCE = radius-radius/4;
   switch (PBL_PLATFORM_TYPE_CURRENT) {
-      break;
     case PlatformTypeChalk:
       LABELHEIGHT = C_LABELHEIGHT;
       LABELWIDTH = C_LABELWIDTH;
@@ -166,26 +184,6 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   GPathInfo HOUR_HAND_INFO = (GPathInfo) {
     .num_points = 9,
     .points = (GPoint[9]) {
-/*
-      {-3, 4},
-      {-3, -radius + PBL_IF_ROUND_ELSE(62,48)},
-      {-7, -radius + PBL_IF_ROUND_ELSE(60,46)},
-      {-8, -radius + PBL_IF_ROUND_ELSE(54,40)},
-      {0, -radius + PBL_IF_ROUND_ELSE(40,26)},
-      {8, -radius + PBL_IF_ROUND_ELSE(54,40)},
-      {7, -radius + PBL_IF_ROUND_ELSE(60,46)},
-      {3, -radius + PBL_IF_ROUND_ELSE(62,48)},
-      {3, 4}
-      {-3, 4},
-      {-3, -radius + PBL_IF_ROUND_ELSE(radius/2 +2, radius/2 +12)},
-      {-7, -radius + PBL_IF_ROUND_ELSE(radius/2, radius/2 +10)},
-      {-8, -radius + PBL_IF_ROUND_ELSE(radius/2 -6, radius/2 +6)},
-      {0, -radius + PBL_IF_ROUND_ELSE(radius/2 -20, radius/2 -10)},
-      {8, -radius + PBL_IF_ROUND_ELSE(radius/2 -6, radius/2 +6)},
-      {7, -radius + PBL_IF_ROUND_ELSE(radius/2, radius/2 +10)},
-      {3, -radius + PBL_IF_ROUND_ELSE(radius/2 +2, radius/2 +12)},
-      {3, 4}
-*/
       {-3, 4},
       {-3, -radius + radius/2 +12},
       {-7, -radius + radius/2 +10},
@@ -201,26 +199,6 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   GPathInfo MINUTE_HAND_INFO = (GPathInfo) {
     .num_points = 9,
     .points = (GPoint[9]) {
-/*
-      {-3, 4},
-      {-3, -radius + PBL_IF_ROUND_ELSE(42,34)},
-      {-7, -radius + PBL_IF_ROUND_ELSE(40,32)},
-      {-8, -radius + PBL_IF_ROUND_ELSE(34,26)},
-      {0, -radius + PBL_IF_ROUND_ELSE(20,12)},
-      {8, -radius + PBL_IF_ROUND_ELSE(34,26)},
-      {7, -radius + PBL_IF_ROUND_ELSE(40,32)},
-      {3, -radius + PBL_IF_ROUND_ELSE(42,34)},
-      {3, 4}
-      {-3, 4},
-      {-3, -radius + PBL_IF_ROUND_ELSE(radius/3 +2, radius/3 +12)},
-      {-7, -radius + PBL_IF_ROUND_ELSE(radius/3, radius/3 +10)},
-      {-8, -radius + PBL_IF_ROUND_ELSE(radius/3 -6, radius/3 +6)},
-      {0, -radius + PBL_IF_ROUND_ELSE(radius/3 -20, radius/3 -10)},
-      {8, -radius + PBL_IF_ROUND_ELSE(radius/3 -6, radius/3 +6)},
-      {7, -radius + PBL_IF_ROUND_ELSE(radius/3, radius/3 +10)},
-      {3, -radius + PBL_IF_ROUND_ELSE(radius/3 +2, radius/3 +12)},
-      {3, 4}
-*/
       {-3, 4},
       {-3, -radius + radius/3 +12},
       {-7, -radius + radius/3 +10},
@@ -271,16 +249,16 @@ static void prv_window_load(Window *window) {
 
   switch (PBL_PLATFORM_TYPE_CURRENT) {
     case PlatformTypeChalk:
-      s_label_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_LABEL_16));
-      s_label_small_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_LABEL_13));
+      s_label_font = fonts_load_custom_font(resource_get_handle(C_LABEL_FONT));
+      s_label_small_font = fonts_load_custom_font(resource_get_handle(C_LABEL_SMALL_FONT));
       break;
     case PlatformTypeEmery:
-      s_label_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_LABEL_18));
-      s_label_small_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_LABEL_16));
+      s_label_font = fonts_load_custom_font(resource_get_handle(E_LABEL_FONT));
+      s_label_small_font = fonts_load_custom_font(resource_get_handle(E_LABEL_SMALL_FONT));
       break;
     default:
-      s_label_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_LABEL_13));
-      s_label_small_font = fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_LABEL_11));
+      s_label_font = fonts_load_custom_font(resource_get_handle(ABD_LABEL_FONT));
+      s_label_small_font = fonts_load_custom_font(resource_get_handle(ABD_LABEL_SMALL_FONT));
   }
 
   if (settings.ShowClockPattern) {
