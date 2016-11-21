@@ -71,6 +71,7 @@ void prv_load_settings() {
   persist_read_data(SETTINGS_KEY, &settings, sizeof(settings));
 
   app_message_register_inbox_received(prv_inbox_received_handler);
-  app_message_open(64, 64);
+  app_message_open(32, 32);
+  //app_message_open(APP_MESSAGE_INBOX_SIZE_MINIMUM, APP_MESSAGE_OUTBOX_SIZE_MINIMUM);
 }
 
