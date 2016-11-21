@@ -13,8 +13,8 @@ Clay configuration is available:
 - Show/hide clock pattern
 - Hand fill/outline colour
 - Draw hour hand over minute hand
+- Hourly vibration
 - Toggle Bluetooth vibration
 - Change background colour on Bluetooth disconnect
 
 [Appstore](https://apps.getpebble.com/en_US/application/5816884a46041f64b000026a)
-
