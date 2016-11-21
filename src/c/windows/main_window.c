@@ -108,7 +108,12 @@ static void clock_update_proc(Layer *layer, GContext *ctx) {
         scale = 8;
     }
     }
-    pdc_transform_gdraw_command_image_draw_transformed(ctx, s_bg, origin, scale, 0);
+
+    if (PBL_PLATFORM_TYPE_CURRENT == PlatformTypeAplite) {
+      gdraw_command_image_draw(ctx, s_bg, origin);
+    } else {
+      pdc_transform_gdraw_command_image_draw_transformed(ctx, s_bg, origin, scale, 0);
+    }
   }
 
   // Border
