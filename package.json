@@ -1,7 +1,7 @@
 {
   "name": "Rokkenjima",
   "author": "jyntran",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "keywords": [
     "pebble-app"
   ],
@@ -31,11 +31,24 @@
       "HandColour",
       "HandOutlineColour",
       "HourOverMinute",
+      "HourlyVibration",
       "BtVibration",
       "BtBackgroundColour"
     ],
     "resources": {
       "media": [
+        {
+          "characterRegex": "[IVX]",
+          "type": "font",
+          "name": "FONT_LABEL_11",
+          "file": "fonts/LinLibertine_RB.ttf"
+        },
+        {
+          "characterRegex": "[IVX]",
+          "type": "font",
+          "name": "FONT_LABEL_12",
+          "file": "fonts/LinLibertine_RB.ttf"
+        },
         {
           "characterRegex": "[IVX]",
           "type": "font",
@@ -45,7 +58,25 @@
         {
           "characterRegex": "[IVX]",
           "type": "font",
-          "name": "FONT_LABEL_14",
+          "name": "FONT_LABEL_16",
+          "file": "fonts/LinLibertine_RB.ttf"
+        },
+        {
+          "characterRegex": "[IVX]",
+          "type": "font",
+          "name": "FONT_LABEL_18",
+          "file": "fonts/LinLibertine_RB.ttf"
+        },
+        {
+          "characterRegex": "[IVX]",
+          "type": "font",
+          "name": "FONT_LABEL_20",
+          "file": "fonts/LinLibertine_RB.ttf"
+        },
+        {
+          "characterRegex": "[IVX]",
+          "type": "font",
+          "name": "FONT_LABEL_24",
           "file": "fonts/LinLibertine_RB.ttf"
         },
         {

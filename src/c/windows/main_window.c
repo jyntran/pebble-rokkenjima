@@ -1,14 +1,27 @@
 #include "main_window.h"
 
 static Window *s_window;
-static Layer *s_clock_layer, *s_hands_layer;
+static Layer *s_window_layer, *s_clock_layer, *s_hands_layer;
 static GDrawCommandImage *s_bg;
-static GFont s_label_font;
+static GFont s_label_font, s_label_small_font;
 
 void prv_window_update() {
   window_set_background_color(s_window, settings.BackgroundColour);
   layer_mark_dirty(s_clock_layer);
   layer_mark_dirty(s_hands_layer);
+}
+
+static void prv_unobstructed_will_change(GRect final_unobstructed_screen_area, void *context) {
+  GRect full_bounds = layer_get_bounds(s_window_layer);
+  if (grect_equal(&full_bounds, &final_unobstructed_screen_area)) {
+  } 
+}
+
+static void prv_unobstructed_did_change(void *context) {
+  GRect full_bounds = layer_get_bounds(s_window_layer);
+  GRect bounds = layer_get_unobstructed_bounds(s_window_layer);
+  if (!grect_equal(&full_bounds, &bounds)) {
+  }
 }
 
 void bluetooth_callback(bool connected) {
@@ -30,29 +43,65 @@ void bluetooth_callback(bool connected) {
 
 static void clock_update_proc(Layer *layer, GContext *ctx) {
   GRect bounds = layer_get_bounds(layer);
+  GRect unobstructed_bounds = layer_get_unobstructed_bounds(layer);
+  int16_t obstruction_height = bounds.size.h - unobstructed_bounds.size.h;
   
   // White clockface
+  if (!obstruction_height == 0) {
+    bounds = unobstructed_bounds;
+  }
   GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
-  uint16_t radius = bounds.size.w/2;
+  uint16_t radius = bounds.size.h < bounds.size.w ? bounds.size.h/2 : bounds.size.w/2;
   graphics_context_set_fill_color(ctx, settings.ClockColour);
   graphics_fill_radial(ctx, bounds, GOvalScaleModeFitCircle, radius, 0, DEG_TO_TRIGANGLE(360));
 
   // Background
   if (settings.ShowClockPattern) {
-    gdraw_command_image_draw(ctx, s_bg, GPoint(centre.x-52, centre.y-50));
+    GPoint origin;
+    uint16_t scale = 10;
+    if (obstruction_height == 0) {
+    switch (PBL_PLATFORM_TYPE_CURRENT) {
+      case PlatformTypeChalk:
+        origin = GPoint(centre.x-62, centre.y-60);
+        scale = 12;
+        break;
+      case PlatformTypeEmery:
+        origin = GPoint(centre.x-72, centre.y-70);
+        scale = 14;
+        break;
+      default:
+        origin = GPoint(centre.x-52, centre.y-50);
+        scale = 10;
+    }
+    } else {
+    switch (PBL_PLATFORM_TYPE_CURRENT) {
+      case PlatformTypeChalk:
+        origin = GPoint(centre.x-52, centre.y-50);
+        scale = 10;
+        break;
+      case PlatformTypeEmery:
+        origin = GPoint(centre.x-62, centre.y-60);
+        scale = 12;
+        break;
+      default:
+        origin = GPoint(centre.x-40, centre.y-40);
+        scale = 8;
+    }
+    }
+    pdc_transform_gdraw_command_image_draw_transformed(ctx, s_bg, origin, scale, 0);
   }
 
   // Border
   GRect frame;
   graphics_context_set_stroke_color(ctx, GColorDarkGray);
   graphics_context_set_stroke_width(ctx, 1);
-  frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(8, 4)));
+  frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(6, 4)));
   graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
-  frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(10, 6)));
+  frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(8, 6)));
   graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
-  frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(64, 48)));
+  frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(2*radius/3, 2*radius/3-2)));
   graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
-  frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(66, 50)));
+  frame = grect_inset(bounds, GEdgeInsets(PBL_IF_ROUND_ELSE(2*radius/3+2, 2*radius/3)));
   graphics_draw_arc(ctx, frame, GOvalScaleModeFitCircle, 0, DEG_TO_TRIGANGLE(360));
 
   // Numbers
@@ -71,10 +120,27 @@ static void clock_update_proc(Layer *layer, GContext *ctx) {
     {11, "XI"}      
   };
 
+  uint16_t LABELHEIGHT = 0;
+  uint16_t LABELWIDTH = 0;
+  uint16_t LABELDISTANCE = radius-radius/4;
+  switch (PBL_PLATFORM_TYPE_CURRENT) {
+    case PlatformTypeChalk:
+      LABELHEIGHT = C_LABELHEIGHT;
+      LABELWIDTH = C_LABELWIDTH;
+      break;
+    case PlatformTypeEmery:
+      LABELHEIGHT = E_LABELHEIGHT;
+      LABELWIDTH = E_LABELWIDTH;
+      break;
+    default:
+      LABELHEIGHT = ABD_LABELHEIGHT;
+      LABELWIDTH = ABD_LABELWIDTH;
+  }
+
   for (int i=0; i <12; i++) {
     int angle = (TRIG_MAX_ANGLE * (i % 12) * 6) / (12 * 6);
-    int x = (centre.x - (LABELWIDTH/2)) + (sin_lookup(angle) * (radius-PBL_IF_ROUND_ELSE(24,16)) / TRIG_MAX_RATIO);
-    int y = (centre.y - (LABELHEIGHT/2)) + (-cos_lookup(angle) * (radius-PBL_IF_ROUND_ELSE(24,16)) / TRIG_MAX_RATIO);
+    int x = (centre.x - (LABELWIDTH/2)) + (sin_lookup(angle) * LABELDISTANCE / TRIG_MAX_RATIO);
+    int y = (centre.y - (LABELHEIGHT/2)) + (-cos_lookup(angle) * LABELDISTANCE / TRIG_MAX_RATIO);
   
     if (i==0) { // red 12
       graphics_context_set_text_color(ctx, GColorRed);
@@ -92,7 +158,7 @@ static void clock_update_proc(Layer *layer, GContext *ctx) {
     graphics_draw_text(
       ctx,
       LABELS[i].text,
-      s_label_font,
+      obstruction_height > 0 ? s_label_small_font : s_label_font,
       pos,
       GTextOverflowModeWordWrap,
       GTextAlignmentCenter,
@@ -105,22 +171,27 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
   struct tm *t = localtime(&now);
   
   GRect bounds = layer_get_bounds(layer);
-
+  GRect unobstructed_bounds = layer_get_unobstructed_bounds(layer);
+  int16_t obstruction_height = bounds.size.h - unobstructed_bounds.size.h;
+  
   // Minute/hour hands
+  if (!obstruction_height == 0) {
+    bounds = unobstructed_bounds;
+  }
   GPoint centre = GPoint(bounds.size.w/2, bounds.size.h/2);
-  uint32_t radius = bounds.size.w/2; 
+  uint16_t radius = bounds.size.h < bounds.size.w ? bounds.size.h/2 : bounds.size.w/2;
 
   GPathInfo HOUR_HAND_INFO = (GPathInfo) {
     .num_points = 9,
     .points = (GPoint[9]) {
       {-3, 4},
-      {-3, -radius + PBL_IF_ROUND_ELSE(62,48)},
-      {-7, -radius + PBL_IF_ROUND_ELSE(60,46)},
-      {-8, -radius + PBL_IF_ROUND_ELSE(54,40)},
-      {0, -radius + PBL_IF_ROUND_ELSE(40,26)},
-      {8, -radius + PBL_IF_ROUND_ELSE(54,40)},
-      {7, -radius + PBL_IF_ROUND_ELSE(60,46)},
-      {3, -radius + PBL_IF_ROUND_ELSE(62,48)},
+      {-3, -radius + radius/2 +12},
+      {-7, -radius + radius/2 +10},
+      {-8, -radius + radius/2 +6},
+      {0, -radius + radius/2 -10},
+      {8, -radius + radius/2 +6},
+      {7, -radius + radius/2 +10},
+      {3, -radius + radius/2 +12},
       {3, 4}
     }
   };
@@ -129,13 +200,13 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
     .num_points = 9,
     .points = (GPoint[9]) {
       {-3, 4},
-      {-3, -radius + PBL_IF_ROUND_ELSE(42,34)},
-      {-7, -radius + PBL_IF_ROUND_ELSE(40,32)},
-      {-8, -radius + PBL_IF_ROUND_ELSE(34,26)},
-      {0, -radius + PBL_IF_ROUND_ELSE(20,12)},
-      {8, -radius + PBL_IF_ROUND_ELSE(34,26)},
-      {7, -radius + PBL_IF_ROUND_ELSE(40,32)},
-      {3, -radius + PBL_IF_ROUND_ELSE(42,34)},
+      {-3, -radius + radius/3 +12},
+      {-7, -radius + radius/3 +10},
+      {-8, -radius + radius/3 +6},
+      {0, -radius + radius/3 -10},
+      {8, -radius + radius/3 +6},
+      {7, -radius + radius/3 +10},
+      {3, -radius + radius/3 +12},
       {3, 4}
     }
   };
@@ -173,10 +244,22 @@ static void hands_update_proc(Layer *layer, GContext *ctx) {
 }
 
 static void prv_window_load(Window *window) {
-  Layer *window_layer = window_get_root_layer(window);
-  GRect bounds = layer_get_bounds(window_layer);
+  s_window_layer = window_get_root_layer(window);
+  GRect bounds = layer_get_bounds(s_window_layer);
 
-  s_label_font = fonts_load_custom_font(resource_get_handle(PBL_IF_ROUND_ELSE(RESOURCE_ID_FONT_LABEL_14, RESOURCE_ID_FONT_LABEL_13)));
+  switch (PBL_PLATFORM_TYPE_CURRENT) {
+    case PlatformTypeChalk:
+      s_label_font = fonts_load_custom_font(resource_get_handle(C_LABEL_FONT));
+      s_label_small_font = fonts_load_custom_font(resource_get_handle(C_LABEL_SMALL_FONT));
+      break;
+    case PlatformTypeEmery:
+      s_label_font = fonts_load_custom_font(resource_get_handle(E_LABEL_FONT));
+      s_label_small_font = fonts_load_custom_font(resource_get_handle(E_LABEL_SMALL_FONT));
+      break;
+    default:
+      s_label_font = fonts_load_custom_font(resource_get_handle(ABD_LABEL_FONT));
+      s_label_small_font = fonts_load_custom_font(resource_get_handle(ABD_LABEL_SMALL_FONT));
+  }
 
   if (settings.ShowClockPattern) {
     s_bg = gdraw_command_image_create_with_resource(RESOURCE_ID_IMAGE_BG);
@@ -187,12 +270,18 @@ static void prv_window_load(Window *window) {
   // Clock layer
   s_clock_layer = layer_create(bounds);
   layer_set_update_proc(s_clock_layer, clock_update_proc);
-  layer_add_child(window_layer, s_clock_layer);
+  layer_add_child(s_window_layer, s_clock_layer);
 
   // Hands layer
   s_hands_layer = layer_create(bounds);
   layer_set_update_proc(s_hands_layer, hands_update_proc);
-  layer_add_child(window_layer, s_hands_layer);
+  layer_add_child(s_window_layer, s_hands_layer);
+
+  UnobstructedAreaHandlers handlers = {
+    .will_change = prv_unobstructed_will_change,
+    .did_change = prv_unobstructed_did_change
+  };
+  unobstructed_area_service_subscribe(handlers, NULL);
 
   prv_window_update();
 }
@@ -201,6 +290,7 @@ static void prv_window_unload(Window *window) {
   layer_destroy(s_hands_layer);
   layer_destroy(s_clock_layer);
   fonts_unload_custom_font(s_label_font);
+  fonts_unload_custom_font(s_label_small_font);
   gdraw_command_image_destroy(s_bg);
   if (s_window) { window_destroy(s_window); }
 }
