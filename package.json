@@ -40,12 +40,6 @@
         {
           "characterRegex": "[IVX]",
           "type": "font",
-          "name": "FONT_LABEL_11",
-          "file": "fonts/LinLibertine_RB.ttf"
-        },
-        {
-          "characterRegex": "[IVX]",
-          "type": "font",
           "name": "FONT_LABEL_12",
           "file": "fonts/LinLibertine_RB.ttf"
         },
@@ -71,12 +65,6 @@
           "characterRegex": "[IVX]",
           "type": "font",
           "name": "FONT_LABEL_20",
-          "file": "fonts/LinLibertine_RB.ttf"
-        },
-        {
-          "characterRegex": "[IVX]",
-          "type": "font",
-          "name": "FONT_LABEL_24",
           "file": "fonts/LinLibertine_RB.ttf"
         },
         {
