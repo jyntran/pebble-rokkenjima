@@ -257,7 +257,13 @@ static void prv_window_load(Window *window) {
   GRect bounds = layer_get_bounds(s_window_layer);
 
   if (settings.ShowClockPattern) {
-    s_bg = gdraw_command_image_create_with_resource(RESOURCE_ID_IMAGE_BG);
+    switch (settings.ClockPatternColour) {
+      case 1:
+        s_bg = gdraw_command_image_create_with_resource(BG_RED);
+        break;
+      default:
+        s_bg = gdraw_command_image_create_with_resource(BG_GRAY);
+    }
   }
 
   bluetooth_callback(connection_service_peek_pebble_app_connection());

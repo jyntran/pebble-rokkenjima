@@ -29,6 +29,23 @@
         "defaultValue": true
       },
       {
+        "type": "select",
+        "messageKey": "ClockPatternColour",
+        "label": "Change Clock Pattern Colour",
+        "description": "Choose the colour of the floral pattern",
+        "defaultValue": 0,
+        "options": [
+          {
+            "label": "Gray",
+            "value": 0
+          },
+          {
+            "label": "Red",
+            "value": 1
+          }
+        ]
+      },
+      {
         "type": "color",
         "messageKey": "HandColour",
         "label": "Hand Colour",

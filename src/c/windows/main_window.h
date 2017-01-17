@@ -18,6 +18,9 @@
 #define C_LABELWIDTH 28
 #define E_LABELWIDTH 34
 
+#define BG_GRAY RESOURCE_ID_IMAGE_BG_GRAY
+#define BG_RED RESOURCE_ID_IMAGE_BG_RED
+
 struct Label {
     uint32_t num;
     char text[5];
