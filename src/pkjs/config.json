@@ -40,8 +40,28 @@
             "value": 0
           },
           {
-            "label": "Blue",
+            "label": "Red",
             "value": 1
+          },
+          {
+            "label": "Blue",
+            "value": 2
+          },
+          {
+            "label": "Green",
+            "value": 3
+          },
+          {
+            "label": "Yellow",
+            "value": 4
+          },
+          {
+            "label": "Gold",
+            "value": 5
+          },
+          {
+            "label": "Pink",
+            "value": 6
           }
         ]
       },
@@ -50,7 +70,7 @@
         "messageKey": "HandColour",
         "label": "Hand Colour",
         "description": "Change the fill colour of the clock hands",
-        "defaultValue": "0xFFFF00"
+        "defaultValue": "0xFFAA55"
       },
       {
         "type": "color",
