@@ -11,6 +11,7 @@ Clay configuration is available:
 - Background colour
 - Clock colour
 - Show/hide clock pattern
+- Change clock pattern colour
 - Hand fill/outline colour
 - Draw hour hand over minute hand
 - Hourly vibration
