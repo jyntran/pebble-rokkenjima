@@ -259,7 +259,7 @@ static void prv_window_load(Window *window) {
   if (settings.ShowClockPattern) {
     switch (settings.ClockPatternColour) {
       case 1:
-        s_bg = gdraw_command_image_create_with_resource(BG_RED);
+        s_bg = gdraw_command_image_create_with_resource(BG_BLUE);
         break;
       default:
         s_bg = gdraw_command_image_create_with_resource(BG_GRAY);
@@ -289,7 +289,6 @@ static void prv_window_unload(Window *window) {
   gpath_destroy(s_m_hand);
   layer_destroy(s_hands_layer);
   layer_destroy(s_clock_layer);
-  //if (s_window_layer) { layer_destroy(s_window_layer); }
   if (s_window) { window_destroy(s_window); }
 }
 

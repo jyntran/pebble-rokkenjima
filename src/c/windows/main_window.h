@@ -19,7 +19,7 @@
 #define E_LABELWIDTH 34
 
 #define BG_GRAY RESOURCE_ID_IMAGE_BG_GRAY
-#define BG_RED RESOURCE_ID_IMAGE_BG_RED
+#define BG_BLUE RESOURCE_ID_IMAGE_BG_BLUE
 
 struct Label {
     uint32_t num;

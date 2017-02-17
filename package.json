@@ -75,8 +75,8 @@
         },
         {
           "type": "raw",
-          "name": "IMAGE_BG_RED",
-          "file": "images/bg_red.pdc"
+          "name": "IMAGE_BG_BLUE",
+          "file": "images/bg_blue.pdc"
         }
       ]
     }

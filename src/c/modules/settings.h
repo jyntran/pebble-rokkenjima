@@ -7,7 +7,7 @@ typedef struct ClaySettings {
   GColor BackgroundColour;
   GColor ClockColour;
   bool ShowClockPattern;
-  uint32_t ClockPatternColour;
+  int ClockPatternColour;
   GColor HandColour;
   GColor HandOutlineColour;
   bool HourOverMinute;

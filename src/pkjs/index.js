@@ -11,7 +11,7 @@ Pebble.addEventListener('webviewclosed', function(e) {
   var dict = clay.getSettings(e.response);
 
   // Save int values from Clay settings
-  dict[messageKeys.FontStyle] = parseInt(dict[messageKeys.FontStyle]);
+  dict[messageKeys.ClockPatternColour] = parseInt(dict[messageKeys.ClockPatternColour]);
 
   Pebble.sendAppMessage(dict, function() {
     console.log('Message sent successfully: ' + JSON.stringify(dict));
