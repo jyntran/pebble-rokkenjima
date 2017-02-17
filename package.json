@@ -1,7 +1,7 @@
 {
   "name": "Rokkenjima",
   "author": "jyntran",
-  "version": "2.2.0",
+  "version": "3.0.0",
   "keywords": [
     "pebble-app"
   ],
@@ -28,6 +28,7 @@
       "BackgroundColour",
       "ClockColour",
       "ShowClockPattern",
+      "ClockPatternColour",
       "HandColour",
       "HandOutlineColour",
       "HourOverMinute",
@@ -69,8 +70,38 @@
         },
         {
           "type": "raw",
-          "name": "IMAGE_BG",
-          "file": "images/bg.pdc"
+          "name": "IMAGE_BG_GRAY",
+          "file": "images/bg_gray.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "IMAGE_BG_RED",
+          "file": "images/bg_red.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "IMAGE_BG_BLUE",
+          "file": "images/bg_blue.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "IMAGE_BG_GREEN",
+          "file": "images/bg_green.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "IMAGE_BG_YELLOW",
+          "file": "images/bg_yellow.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "IMAGE_BG_GOLD",
+          "file": "images/bg_gold.pdc"
+        },
+        {
+          "type": "raw",
+          "name": "IMAGE_BG_PINK",
+          "file": "images/bg_pink.pdc"
         }
       ]
     }

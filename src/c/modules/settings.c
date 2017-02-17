@@ -4,6 +4,7 @@ static void prv_default_settings() {
   settings.BackgroundColour = GColorBlack;
   settings.ClockColour = PBL_IF_COLOR_ELSE(GColorPastelYellow, GColorWhite);
   settings.ShowClockPattern = true;
+  settings.ClockPatternColour = 0;
   settings.HandColour = PBL_IF_COLOR_ELSE(GColorChromeYellow, GColorBlack);
   settings.HandOutlineColour = PBL_IF_COLOR_ELSE(GColorWindsorTan, GColorWhite);
   settings.HourlyVibration = false;
@@ -31,6 +32,11 @@ static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) 
   Tuple *ckp_bool_t = dict_find(iter, MESSAGE_KEY_ShowClockPattern);
   if (ckp_bool_t) {
     settings.ShowClockPattern = ckp_bool_t->value->int32 == 1;
+  }
+
+  Tuple *ckp_int_t = dict_find(iter, MESSAGE_KEY_ClockPatternColour);
+  if (ckp_int_t) {
+    settings.ClockPatternColour = ckp_int_t->value->int32;
   }
 
   Tuple *hd_colour_t = dict_find(iter, MESSAGE_KEY_HandColour);

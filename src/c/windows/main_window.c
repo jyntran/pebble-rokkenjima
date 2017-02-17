@@ -257,7 +257,28 @@ static void prv_window_load(Window *window) {
   GRect bounds = layer_get_bounds(s_window_layer);
 
   if (settings.ShowClockPattern) {
-    s_bg = gdraw_command_image_create_with_resource(RESOURCE_ID_IMAGE_BG);
+    switch (settings.ClockPatternColour) {
+      case 1:
+        s_bg = gdraw_command_image_create_with_resource(BG_RED);
+        break;
+      case 2:
+        s_bg = gdraw_command_image_create_with_resource(BG_BLUE);
+        break;
+      case 3:
+        s_bg = gdraw_command_image_create_with_resource(BG_GREEN);
+        break;
+      case 4:
+        s_bg = gdraw_command_image_create_with_resource(BG_YELLOW);
+        break;
+      case 5:
+        s_bg = gdraw_command_image_create_with_resource(BG_GOLD);
+        break;
+      case 6:
+        s_bg = gdraw_command_image_create_with_resource(BG_PINK);
+        break;
+      default:
+        s_bg = gdraw_command_image_create_with_resource(BG_GRAY);
+    }
   }
 
   bluetooth_callback(connection_service_peek_pebble_app_connection());
@@ -283,7 +304,6 @@ static void prv_window_unload(Window *window) {
   gpath_destroy(s_m_hand);
   layer_destroy(s_hands_layer);
   layer_destroy(s_clock_layer);
-  //if (s_window_layer) { layer_destroy(s_window_layer); }
   if (s_window) { window_destroy(s_window); }
 }
 
