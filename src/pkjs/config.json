@@ -29,11 +29,48 @@
         "defaultValue": true
       },
       {
+        "type": "select",
+        "messageKey": "ClockPatternColour",
+        "label": "Change Clock Pattern Colour",
+        "description": "Choose the colour of the floral pattern",
+        "defaultValue": 0,
+        "options": [
+          {
+            "label": "Gray",
+            "value": 0
+          },
+          {
+            "label": "Red",
+            "value": 1
+          },
+          {
+            "label": "Blue",
+            "value": 2
+          },
+          {
+            "label": "Green",
+            "value": 3
+          },
+          {
+            "label": "Yellow",
+            "value": 4
+          },
+          {
+            "label": "Gold",
+            "value": 5
+          },
+          {
+            "label": "Pink",
+            "value": 6
+          }
+        ]
+      },
+      {
         "type": "color",
         "messageKey": "HandColour",
         "label": "Hand Colour",
         "description": "Change the fill colour of the clock hands",
-        "defaultValue": "0xFFFF00"
+        "defaultValue": "0xFFAA55"
       },
       {
         "type": "color",
